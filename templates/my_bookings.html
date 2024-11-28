@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Bookings - TutorConnect</title>
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            font-family: 'Roboto', sans-serif;
+            background-color: #fefefe;
+        }
+
+        /* Dashboard Header */
+        .dashboard-header {
+            background: linear-gradient(to right, #6C63FF, #3B3DFE);
+            padding: 20px 50px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            color: white;
+            border-radius: 0 0 15px 15px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .dashboard-header h1 {
+            font-size: 1.8rem;
+            margin: 0;
+        }
+
+        /* Main Content */
+        .content-container {
+            padding: 30px;
+            margin-top: 50px;
+        }
+
+        h1 {
+            font-size: 2rem;
+            color: #3B3DFE;
+            margin-bottom: 20px;
+        }
+
+        h3 {
+            font-size: 1.5rem;
+            color: #3B3DFE;
+            margin-bottom: 20px;
+        }
+
+        /* Booking List */
+        .booking-list {
+            margin-top: 30px;
+            padding: 20px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .booking-list ul {
+            list-style-type: none;
+            padding: 0;
+        }
+
+        .booking-list li {
+            padding: 15px;
+            border-bottom: 1px solid #f2f2f2;
+        }
+
+        .booking-list li:last-child {
+            border-bottom: none;
+        }
+
+        .booking-list h4 {
+            font-size: 1.2rem;
+            margin-bottom: 10px;
+            color: #3B3DFE;
+        }
+
+        .booking-list p {
+            font-size: 1rem;
+            color: #666;
+        }
+
+        /* Create Booking Button */
+        .create-booking-btn {
+            margin-top: 30px;
+            padding: 15px 30px;
+            font-size: 1rem;
+            color: white;
+            background: #6C63FF;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .create-booking-btn:hover {
+            background: #3B3DFE;
+        }
+
+        /* Form for New Booking */
+        .create-booking-form {
+            margin-top: 30px;
+            padding: 20px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .create-booking-form label {
+            font-size: 1rem;
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .create-booking-form input,
+        .create-booking-form select {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 15px;
+            font-size: 1rem;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        .create-booking-form button {
+            padding: 15px 30px;
+            font-size: 1rem;
+            color: white;
+            background: #6C63FF;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .create-booking-form button:hover {
+            background: #3B3DFE;
+        }
+    </style>
+</head>
+<body>
+    <!-- Dashboard Header -->
+    <header class="dashboard-header">
+        <a href="/" class="logo">TutorConnect</a>
+    </header>
+
+    <!-- Main Content -->
+    <div class="content-container">
+        <h1>My Bookings</h1>
+
+        <!-- Bookings List Section -->
+        <h3>Upcoming Bookings</h3>
+        <div class="booking-list">
+            <ul>
+                {% if bookings %}
+                    {% for booking in bookings %}
+                        <li>
+                            <h4>{{ booking[1] }} ({{ booking[2] }})</h4>
+                            <p>Status: {{ booking[3] }}</p>
+                        </li>
+                    {% endfor %}
+                {% else %}
+                    <li>No bookings found.</li>
+                {% endif %}
+            </ul>
+        </div>
+
+        <!-- Create Booking Section -->
+        <h3>Create a New Booking</h3>
+        <div class="create-booking-form">
+            <form action="{{ url_for('create_booking') }}" method="POST">
+                <label for="coach_id">Coach ID:</label>
+                <input type="number" name="coach_id" id="coach_id" required><br>
+
+                <label for="listing_id">Listing ID:</label>
+                <input type="number" name="listing_id" id="listing_id" required><br>
+
+                <label for="booking_date">Booking Date:</label>
+                <input type="date" name="booking_date" id="booking_date" required><br>
+
+                <label for="persons_booked">Number of Persons:</label>
+                <input type="number" name="persons_booked" id="persons_booked" required><br>
+
+                <button type="submit">Create Booking</button>
+            </form>
+        </div>
+    </div>
+</body>
+</html>

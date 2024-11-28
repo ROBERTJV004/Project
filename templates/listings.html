@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Listings</title>
+</head>
+<body>
+    <h1>Active Listings</h1>
+    {% if listings %}
+        <ul>
+        {% for listing in listings %}
+            <li>
+                <h3>{{ listing.title }}</h3>
+                <p>{{ listing.description }}</p>
+                <p>Price: ${{ listing.price }}</p>
+                <p>Status: {{ listing.status }}</p>
+                <p>Created At: {{ listing.created_at }}</p>
+            </li>
+        {% endfor %}
+        </ul>
+    {% else %}
+        <p>No listings found.</p>
+    {% endif %}
+</body>
+</html>
