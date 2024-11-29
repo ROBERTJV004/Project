@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - TutorConnect</title>
+    <style>
+        /* General Reset */
+        body, html {
+            margin: 0;
+            padding: 0;
+            font-family: 'Roboto', sans-serif;
+            background-color: #fefefe;
+            overflow-x: hidden; /* Prevent horizontal scrolling */
+        }
+
+        /* Dashboard Background */
+        .dashboard-background {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(to bottom right, #6C63FF, #3B3DFE, #FFFFFF);
+            z-index: -1; /* Ensure it stays behind content */
+            overflow: hidden;
+        }
+
+        /* Floating Shapes */
+        .shape {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            z-index: -1;
+            animation: float 8s ease-in-out infinite;
+        }
+
+        .shape:nth-child(1) {
+            top: 10%;
+            left: 15%;
+            width: 120px;
+            height: 120px;
+            animation-delay: 1s;
+        }
+
+        .shape:nth-child(2) {
+            bottom: 20%;
+            right: 10%;
+            width: 180px;
+            height: 180px;
+            animation-delay: 2s;
+        }
+
+        .shape:nth-child(3) {
+            top: 50%;
+            left: 60%;
+            width: 80px;
+            height: 80px;
+            animation-delay: 3s;
+        }
+
+        .shape:nth-child(4) {
+            bottom: 10%;
+            left: 25%;
+            width: 150px;
+            height: 150px;
+            animation-delay: 4s;
+        }
+
+        @keyframes float {
+            0% { transform: translateY(0); }
+            50% { transform: translateY(-20px); }
+            100% { transform: translateY(0); }
+        }
+
+        /* Dashboard Header */
+        .dashboard-header {
+            background: linear-gradient(to right, #6C63FF, #3B3DFE);
+            padding: 20px 50px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            color: white;
+            border-radius: 0 0 15px 15px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .dashboard-header h1 {
+            font-size: 1.8rem;
+            margin: 0;
+        }
+
+        /* Logo */
+        .logo {
+            font-size: 1.8rem;
+            font-weight: 800;
+            color: #ffffff;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            background: linear-gradient(90deg, #FF4757, #FBC531);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-decoration: none;
+        }
+
+        /* Notification Bell */
+        .bell-icon {
+            font-size: 1.8rem;
+            color: white;
+            margin-right: 15px;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .bell-icon:hover {
+            color: #FF4757;
+        }
+
+        .bell-icon::after {
+            content: attr(data-count);
+            position: absolute;
+            top: -5px;
+            right: -10px;
+            background: #FF4757;
+            color: white;
+            font-size: 0.8rem;
+            font-weight: bold;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            text-align: center;
+            line-height: 20px;
+            display: none; /* Show only if there are notifications */
+        }
+
+        .bell-icon[data-count]:after {
+            display: inline-block;
+        }
+
+        .dashboard-header .actions {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .dashboard-header .btn {
+            padding: 10px 20px;
+            font-size: 1rem;
+            font-weight: bold;
+            color: white;
+            text-decoration: none;
+            border-radius: 20px;
+            background: #FF4757;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .dashboard-header .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .dashboard-header .btn-secondary {
+            background: #FBC531;
+        }
+
+        .dashboard-header .btn-secondary:hover {
+            background: #E1B12C;
+        }
+
+        /* Main Content */
+        .dashboard-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 50px 20px;
+            z-index: 1; /* Ensure it appears above the background */
+        }
+
+        .welcome-message {
+            font-size: 2rem;
+            color: #3B3DFE;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .dashboard-content h2 {
+            font-size: 2.5rem;
+            color: #3B3DFE;
+            margin-bottom: 40px;
+        }
+
+        /* Dashboard Features */
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 30px;
+        }
+
+        .feature-card {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            text-align: center;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            text-decoration: none;
+            color: #333;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .feature-card h3 {
+            font-size: 1.5rem;
+            color: #3B3DFE;
+            margin-bottom: 15px;
+        }
+
+        .feature-card p {
+            font-size: 1rem;
+            color: #666;
+            line-height: 1.6;
+        }
+
+        /* Footer Section */
+        footer {
+            margin-top: auto;
+            padding: 20px;
+            background: #3B3DFE;
+            color: white;
+            text-align: center;
+        }
+
+        footer a {
+            color: #FBC531;
+            text-decoration: none;
+        }
+
+        footer a:hover {
+            text-decoration: underline;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .dashboard-header {
+                flex-direction: column;
+                align-items: center;
+                text-align: center;
+            }
+
+            .dashboard-header h1 {
+                margin-bottom: 10px;
+            }
+
+            .features-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .logo {
+                font-size: 1.5rem; /* Adjust logo size for smaller screens */
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Background Shapes -->
+    <div class="dashboard-background">
+        <div class="shape"></div>
+        <div class="shape"></div>
+        <div class="shape"></div>
+        <div class="shape"></div>
+    </div>
+
+    <!-- Dashboard Header -->
+    <header class="dashboard-header">
+        <a href="/" class="logo">TutorConnect</a>
+        <div class="actions">
+            <span class="bell-icon" data-count="3">&#128276;</span>
+            <a href="/profile" class="btn">Profile</a>
+            <a href="/logout" class="btn btn-secondary">Log Out</a>
+        </div>
+    </header>
+
+    <!-- Dashboard Content -->
+    <div class="dashboard-content">
+        <p class="welcome-message">Welcome, {{ username }}!</p>
+        <h2>Your Dashboard</h2>
+        <div class="features-grid">
+            <!-- My Bookings -->
+            <a href="/my_bookings" class="feature-card">
+                <h3>My Bookings</h3>
+                <p>View and manage your upcoming tutoring sessions easily.</p>
+            </a>
+            <!-- All Listings -->
+            <a href="/all_listings" class="feature-card">
+                <h3>All Listings</h3>
+                <p>Create and manage your tutoring listings to connect with students.</p>
+            </a>
+            <!-- Reviews -->
+            <a href="/reviews" class="feature-card">
+                <h3>Reviews</h3>
+                <p>Read and respond to reviews left by students and tutors.</p>
+            </a>
+            <!-- Live Chat -->
+            <a href="/chat" class="feature-card">
+                <h3>Live Chat</h3>
+                <p>Connect with tutors in real-time to get immediate help and advice.</p>
+            </a>
+        </div>
+    </div>
+
+    <footer>
+        &copy; 2024 TutorConnect. All rights reserved. <a href="/privacy">Privacy Policy</a>
+    </footer>
+</body>
+</html>

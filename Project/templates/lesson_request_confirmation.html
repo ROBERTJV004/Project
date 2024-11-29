@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lesson Request Confirmation</title>
+    <style>
+        /* General Body Styles */
+        body {
+            font-family: 'Roboto', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f0f0f0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* Animated Background */
+        @keyframes fadeBackground {
+            0% {
+                background-color: #6C63FF;
+            }
+            50% {
+                background-color: #3B3DFE;
+            }
+            100% {
+                background-color: #6C63FF;
+            }
+        }
+
+        /* Apply the animation */
+        body {
+            animation: fadeBackground 10s ease-in-out infinite;
+        }
+
+        /* Container for Confirmation */
+        .container {
+            background-color: #fff;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 600px;
+            text-align: center;
+        }
+
+        /* Heading */
+        h2 {
+            text-align: center;
+            color: #4a90e2; /* Consistent color */
+            font-size: 24px;
+            margin-bottom: 30px;
+        }
+
+        /* Message */
+        .message {
+            color: #333;
+            font-size: 18px;
+            margin-bottom: 30px;
+        }
+
+        /* Button Styles */
+        button {
+            padding: 12px 20px;
+            font-size: 16px;
+            background-color: #4a90e2; /* Consistent button color */
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            width: 100%;
+            transition: background-color 0.3s ease;
+        }
+
+        button:hover {
+            background-color: #357ab7;
+        }
+
+        /* Back Button */
+        .back-btn {
+            background-color: #007bff;
+        }
+
+        .back-btn:hover {
+            background-color: #0056b3;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            h2 {
+                font-size: 20px;
+            }
+
+            .container {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Confirmation Container -->
+    <div class="container">
+        <h2>Lesson Request Submitted</h2>
+        <p class="message">Your lesson request has been successfully submitted. It is now pending approval.</p>
+        
+        <!-- Back Button to Dashboard -->
+        <a href="/dashboard">
+            <button class="back-btn">Back to Dashboard</button>
+        </a>
+    </div>
+
+</body>
+</html>

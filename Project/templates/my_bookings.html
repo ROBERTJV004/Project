@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Bookings</title>
+    <style>
+        /* General Body Styles */
+        body {
+            font-family: 'Roboto', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f0f0f0;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #6C63FF, #3B3DFE);
+            animation: fadeBackground 10s ease-in-out infinite;
+        }
+
+        /* Animation for background fade */
+        @keyframes fadeBackground {
+            0% { background: linear-gradient(135deg, #6C63FF, #3B3DFE); }
+            50% { background: linear-gradient(135deg, #3B3DFE, #6C63FF); }
+            100% { background: linear-gradient(135deg, #6C63FF, #3B3DFE); }
+        }
+
+        /* Container Styles */
+        .container {
+            background-color: #fff;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 800px;
+            margin-top: 50px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        h2 {
+            text-align: center;
+            color: #333;
+            font-size: 24px;
+            margin-bottom: 30px;
+        }
+
+        /* Booking Table */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 30px;
+        }
+
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+
+        th {
+            background-color: #6C63FF;
+            color: white;
+        }
+
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+
+        tr:hover {
+            background-color: #f1f1f1;
+        }
+
+        /* Form Styles */
+        .form-group {
+            margin-bottom: 15px;
+            width: 100%;
+            max-width: 500px;
+        }
+
+        input, textarea {
+            width: 100%;
+            padding: 12px;
+            margin-top: 5px;
+            font-size: 1rem;
+            border-radius: 8px;
+            border: 1px solid #ccc;
+        }
+
+        button {
+            padding: 14px 30px;
+            font-size: 1rem;
+            background-color: #6C63FF;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            margin-top: 20px;
+            transition: background-color 0.3s ease;
+            width: 100%;
+            max-width: 200px;
+        }
+
+        button:hover {
+            background-color: #3B3DFE;
+        }
+
+        .back-btn {
+            background-color: #007bff;
+        }
+
+        .back-btn:hover {
+            background-color: #0056b3;
+        }
+
+        .btn-container {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            table {
+                font-size: 14px;
+            }
+
+            h2 {
+                font-size: 20px;
+            }
+
+            .form-group {
+                max-width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h2>Your Bookings</h2>
+
+        <!-- Display the table of bookings -->
+        <table>
+            <thead>
+                <tr>
+                    <th>Subject</th>
+                    <th>Lesson Date</th>
+                    <th>Lesson Time</th>
+                    <th>Price</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for booking in bookings %}
+                    <tr>
+                        <td>{{ booking[1] }}</td>  <!-- Subject (title) -->
+                        <td>{{ booking[2] }}</td>  <!-- Lesson Date -->
+                        <td>{{ booking[3] }}</td>  <!-- Lesson Time -->
+                        <td>${{ booking[4] }}</td>  <!-- Price -->
+                        <td>{{ booking[5] }}</td>  <!-- Status -->
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <!-- Button to create a new booking -->
+        <form action="/my_bookings" method="POST">
+            <h3>Create a New Booking</h3>
+
+            <div class="form-group">
+                <label for="subject">Subject</label>
+                <input type="text" name="subject" id="subject" required>
+            </div>
+
+            <div class="form-group">
+                <label for="date">Lesson Date</label>
+                <input type="date" name="date" id="date" required>
+            </div>
+
+            <div class="form-group">
+                <label for="time">Lesson Time</label>
+                <input type="time" name="time" id="time" required>
+            </div>
+
+            <div class="form-group">
+                <label for="price">Price</label>
+                <input type="number" name="price" id="price" step="0.01" required>
+            </div>
+
+            <div class="form-group">
+                <label for="description">Description</label>
+                <textarea name="description" id="description" rows="4" required></textarea>
+            </div>
+
+            <button type="submit">Submit Booking Request</button>
+        </form>
+
+        <!-- Back Button -->
+        <div class="btn-container">
+            <a href="/dashboard">
+                <button class="back-btn">Back to Dashboard</button>
+            </a>
+        </div>
+    </div>
+
+</body>
+</html>
