@@ -261,47 +261,103 @@ def dashboard():
 @app.route('/all_listings', methods=['GET'])
 def all_listings():
     if 'user_id' not in session:
-        return redirect(url_for('login'))  # Redirect if the user is not logged in
-
+        return redirect(url_for('login'))  # Redirect to login if not authenticated
+    
     try:
         conn = get_db_connection()
         cur = conn.cursor()
 
-        # Fetch all listings from the database
-        cur.execute("""
-            SELECT l.id, l.title, l.lesson_date, l.lesson_time, l.price, l.status, l.description, u.username 
-            FROM listings l
-            JOIN users u ON l.user_id = u.id
-        """)
-        listings = cur.fetchall()
+        # Fetch Approved Listings (status = 'approved')
+        cur.execute("SELECT * FROM listings WHERE status = 'approved'")
+        approved_listings = cur.fetchall()
+
+        # Fetch All Pending Listings (status = 'pending')
+        cur.execute("SELECT * FROM listings WHERE status = 'pending'")
+        all_pending_listings = cur.fetchall()
 
         cur.close()
         conn.close()
 
-        # Render the template with the listings
-        return render_template('all_listings.html', listings=listings)
+        # Render the template and pass both lists
+        return render_template('all_listings.html', approved_listings=approved_listings, all_pending_listings=all_pending_listings)
 
     except Exception as e:
-        return jsonify({"error": str(e)}), 500
-
-@app.route('/view_listing/<int:listing_id>', methods=['GET'])
+        return jsonify({"error": f"An error occurred: {e}"}), 500
+    
+@app.route('/view_listing/<int:listing_id>', methods=['GET', 'POST'])
 def view_listing(listing_id):
+    # Ensure the user is logged in
+    if 'user_id' not in session:
+        return redirect(url_for('login'))  # Redirect if not logged in
+
     try:
+        user_id = session['user_id']  # Get the logged-in user's ID
         conn = get_db_connection()
         cur = conn.cursor()
+
+        # Fetch the listing details based on listing_id
         cur.execute("SELECT * FROM listings WHERE id = %s", (listing_id,))
         listing = cur.fetchone()
+
+        if not listing:
+            return "Listing not found", 404
+
+        if request.method == 'POST':
+            # Extract listing details for the `bookings` table
+            student_id = listing[1]  # Assuming student_id is in the 2nd column
+            subject = listing[2]  # Assuming subject is in the 3rd column
+            lesson_date = listing[3]  # Assuming lesson_date is in the 4th column
+            lesson_time = listing[4]  # Assuming lesson_time is in the 5th column
+            price = listing[5]  # Assuming price is in the 6th column
+            description = listing[6]  # Assuming description is in the 7th column
+
+            # Insert the approved listing into the `bookings` table
+            cur.execute("""
+                INSERT INTO bookings (student_id, coach_id, listing_id, booking_date, booking_time, price, subject, description, status)
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, 'approved')
+            """, (student_id, user_id, listing[0], lesson_date, lesson_time, price, subject, description))
+
+            # Update the status in the `listings` table
+            cur.execute("""
+                UPDATE listings
+                SET status = 'approved'
+                WHERE id = %s
+            """, (listing_id,))
+
+            # Commit the changes to the database
+            conn.commit()
+
+            cur.close()
+            conn.close()
+
+            # Redirect to a confirmation page or back to all listings
+            return redirect(url_for('approval_success'))
+
+        # Prepare the listing details for the template
+        listing_dict = {
+            "id": listing[0],
+            "student_id": listing[1],
+            "title": listing[2],
+            "lesson_date": listing[3],
+            "lesson_time": listing[4],
+            "price": listing[5],
+            "description": listing[6],
+            "status": listing[7]
+        }
+
         cur.close()
         conn.close()
 
-        return render_template('view_listing.html', listing=listing)
+        return render_template('view_listing.html', listing=listing_dict)
+
     except Exception as e:
-        return jsonify({"error": str(e)}), 500
-    
+        return jsonify({"error": f"An error occurred: {e}"}), 500
+
 # Reviews Page
 @app.route('/reviews')
 def reviews_page():
     return render_template('reviews.html')  # HTML form for adding reviews
+
 
 
 # API to Add a Review
@@ -394,51 +450,86 @@ def lesson_request_confirmation():
     return render_template('lesson_request_confirmation.html')  # Render your confirmation page
 
 
-@app.route('/approve_listing/<int:listing_id>', methods=['POST'])
+@app.route('/approve_listing/<listing_id>', methods=['POST'])
 def approve_listing(listing_id):
+    # Ensure the user is logged in and is a coach
     if 'user_id' not in session:
         return redirect(url_for('login'))  # Redirect if the user is not logged in
-    
-    user_id = session['user_id']
-    
+
+    coach_id = session['user_id']
+
     try:
-        # Step 1: Retrieve the lesson request details from the listings table
+        # Connect to the database
         conn = get_db_connection()
         cur = conn.cursor()
 
-        # Fetch the listing data with the pending request
-        cur.execute("SELECT * FROM listings WHERE id = %s AND status = 'pending'", (listing_id,))
+        # Check if the listing exists and is pending
+        cur.execute("""
+            SELECT * FROM listings
+            WHERE id = %s AND status = 'pending'
+        """, (listing_id,))
         listing = cur.fetchone()
 
         if not listing:
             return jsonify({"error": "Listing not found or already approved"}), 400
-        
-        # Step 2: Insert the listing as a booking with status 'approved'
-        subject = listing[2]  # Subject (Math, etc.) from listings table
-        price = listing[4]     # Price from listings table
-        description = listing[3]  # Description from listings table
-        lesson_date = listing[6]  # Lesson date from listings table
-        lesson_time = listing[7]  # Lesson time from listings table
-        
-        # Insert the lesson request into the bookings table with status "approved"
-        cur.execute("""
-            INSERT INTO bookings (student_id, coach_id, listing_id, booking_date, booking_time, price, subject, description, status)
-            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, 'approved')
-        """, (listing[1], user_id, listing[0], lesson_date, lesson_time, price, subject, description))  # user_id is coach_id here
 
-        # Step 3: Update the status in listings to 'approved'
-        cur.execute("UPDATE listings SET status = 'approved' WHERE id = %s", (listing_id,))
-        
+        # Step 1: Update the status of the listing to 'approved'
+        cur.execute("""
+            UPDATE listings
+            SET status = 'approved', updated_at = CURRENT_TIMESTAMP
+            WHERE id = %s
+        """, (listing_id,))
         conn.commit()
 
         cur.close()
         conn.close()
 
-        return redirect(url_for('view_listing', listing_id=listing_id))  # Redirect to the view listing page
+        # Return the success message and a button to go back to the "All Listings" page
+        return render_template('approve_success.html', listing_id=listing_id)
+
+    except Exception as e:
+        return jsonify({"error": f"An error occurred: {e}"}), 400
+
+@app.route('/delete_listing/<listing_id>', methods=['POST'])
+def delete_listing(listing_id):
+    # Ensure the user is logged in
+    if 'user_id' not in session:
+        return redirect(url_for('login'))  # Redirect if the user is not logged in
+
+    user_id = session['user_id']
+
+    try:
+        # Connect to the database
+        conn = get_db_connection()
+        cur = conn.cursor()
+
+        # Check if the listing exists and is approved
+        cur.execute("""
+            SELECT * FROM listings
+            WHERE id = %s AND status = 'approved'
+        """, (listing_id,))
+        listing = cur.fetchone()
+
+        if not listing:
+            return jsonify({"error": "Listing not found or not approved"}), 400
+
+        # Step 1: Delete the listing from the listings table
+        cur.execute("""
+            DELETE FROM listings
+            WHERE id = %s
+        """, (listing_id,))
+        conn.commit()
+
+        cur.close()
+        conn.close()
+
+        # Redirect to the "All Listings" page
+        return redirect(url_for('all_listings'))
 
     except Exception as e:
         return jsonify({"error": f"An error occurred: {e}"}), 400
     
+
 if __name__ == "__main__":
     app.run(debug=True)
 
