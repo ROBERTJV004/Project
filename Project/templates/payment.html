@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Betalingspagina</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f9;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .payment-form {
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 400px;
+        }
+        .payment-form h2 {
+            margin-bottom: 20px;
+            color: #333;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #555;
+        }
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 10px;
+            font-size: 16px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        .form-group input:focus, .form-group select:focus {
+            outline: none;
+            border-color: #007bff;
+        }
+        .form-group button {
+            width: 100%;
+            padding: 10px;
+            font-size: 16px;
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .form-group button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <form class="payment-form">
+        <h2>Betaling Invoeren</h2>
+        <div class="form-group">
+            <label for="cardholder-name">Naam kaarthouder</label>
+            <input type="text" id="cardholder-name" name="cardholder-name" placeholder="Volledige naam" required>
+        </div>
+        <div class="form-group">
+            <label for="card-number">Kaartnummer</label>
+            <input type="text" id="card-number" name="card-number" placeholder="1234 5678 9012 3456" maxlength="16" pattern="\d{16}" required>
+        </div>
+        <div class="form-group">
+            <label for="expiry-date">Vervaldatum</label>
+            <input type="month" id="expiry-date" name="expiry-date" required>
+        </div>
+        <div class="form-group">
+            <label for="cvv">CVV</label>
+            <input type="text" id="cvv" name="cvv" placeholder="123" maxlength="3" pattern="\d{3}" required>
+        </div>
+        <div class="form-group">
+            <label for="payment-amount">Bedrag</label>
+            <input type="number" id="payment-amount" name="payment-amount" placeholder="Voer het bedrag in" min="0.01" step="0.01" required>
+        </div>
+        <div class="form-group">
+            <label for="payment-method">Betaalmethode</label>
+            <select id="payment-method" name="payment-method" required>
+                <option value="">Selecteer een betaalmethode</option>
+                <option value="visa">Visa</option>
+                <option value="mastercard">Mastercard</option>
+                <option value="amex">American Express</option>
+                <option value="paypal">PayPal</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <button type="submit">Betalen</button>
+        </div>
+    </form>
+</body>
+</html>
