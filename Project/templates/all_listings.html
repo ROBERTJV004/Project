@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -5,85 +6,209 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>All Listings</title>
     <style>
+        /* Body and Background Animation */
         body {
             font-family: Arial, sans-serif;
             margin: 0;
             padding: 0;
-            background-color: #f9f9f9;
+            background: linear-gradient(135deg, #6C63FF, #3B3DFE); /* Purple gradient */
+            background-size: 400% 400%;
+            animation: gradientFade 10s ease infinite;
+            min-height: 100vh;
+            color: #fff;
         }
+
+        @keyframes gradientFade {
+            0% {
+                background-position: 0% 50%;
+            }
+            50% {
+                background-position: 100% 50%;
+            }
+            100% {
+                background-position: 0% 50%;
+            }
+        }
+
         .container {
-            max-width: 1000px;
-            margin: 0 auto;
+            max-width: 900px;
+            margin: 50px auto;
             padding: 20px;
             background-color: #fff;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
             border-radius: 8px;
-            margin-top: 50px;
-        }
-        h2 {
             color: #333;
         }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 20px;
+
+        h2 {
+            text-align: center;
+            font-size: 2rem;
+            margin-bottom: 20px;
         }
-        th, td {
-            padding: 12px;
-            text-align: left;
-            border-bottom: 1px solid #ddd;
+
+        .section-title {
+            font-size: 1.5rem;
+            margin-top: 30px;
+            color: #3B3DFE;
+            border-bottom: 2px solid #ddd;
+            padding-bottom: 5px;
         }
-        th {
-            background-color: #4CAF50;
-            color: white;
+
+        .listing-card {
+            border: 1px solid #ddd;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            background-color: #f9f9f9;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
-        tr:hover {
-            background-color: #f2f2f2;
+
+        .listing-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2);
         }
-        .btn {
-            background-color: #007bff;
-            color: white;
+
+        .listing-card h3 {
+            margin: 0 0 10px;
+            color: #333;
+            font-size: 1.2rem;
+        }
+
+        .listing-card p {
+            margin: 5px 0;
+            color: #555;
+            font-size: 1rem;
+        }
+
+        .listing-card a {
+            display: inline-block;
             padding: 10px 20px;
+            background-color: #3B3DFE;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            margin-top: 10px;
+            transition: background-color 0.3s;
+        }
+
+        .listing-card a:hover {
+            background-color: #6C63FF;
+        }
+
+        .delete-btn {
+            background-color: #ff4c4c;
+            color: white;
+            padding: 8px 12px;
             border: none;
             border-radius: 5px;
             cursor: pointer;
+            font-size: 1rem;
+            transition: background-color 0.3s;
         }
+
+        .delete-btn:hover {
+            background-color: #ff1f1f;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            margin-top: 10px;
+            display: inline-block;
+            transition: background-color 0.3s;
+        }
+
         .btn:hover {
             background-color: #0056b3;
+        }
+
+        /* Top Left Button */
+        .back-btn {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: white;
+            border-radius: 5px;
+            text-decoration: none;
+            font-size: 1rem;
+            transition: background-color 0.3s;
+        }
+
+        .back-btn:hover {
+            background-color: #0056b3;
+        }
+
+        /* Make the buttons and layout responsive */
+        @media (max-width: 768px) {
+            .container {
+                padding: 15px;
+            }
+
+            .listing-card {
+                margin-bottom: 15px;
+            }
         }
     </style>
 </head>
 <body>
+
+    <!-- Back to Dashboard Button in Top Left Corner -->
+    <a href="{{ url_for('dashboard') }}" class="back-btn">Back to Dashboard</a>
+
     <div class="container">
         <h2>All Listings</h2>
-        <table>
-            <thead>
-                <tr>
-                    <th>Subject</th>
-                    <th>Lesson Date</th>
-                    <th>Lesson Time</th>
-                    <th>Price</th>
-                    <th>Status</th>
-                    <th>Student</th>
-                    <th>Details</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for listing in listings %}
-                <tr>
-                    <td>{{ listing[1] }}</td> <!-- Subject (title) -->
-                    <td>{{ listing[2] }}</td> <!-- Lesson Date -->
-                    <td>{{ listing[3] }}</td> <!-- Lesson Time -->
-                    <td>${{ listing[4] }}</td> <!-- Price -->
-                    <td>{{ listing[5] }}</td> <!-- Status -->
-                    <td>{{ listing[7] }}</td> <!-- Coach's username -->
-                    <td>
-                        <a href="{{ url_for('view_listing', listing_id=listing[0]) }}">View Listing</a>
-                    </td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+
+        <!-- Approved Listings -->
+        <div class="section-title">Approved Listings</div>
+        {% if approved_listings %}
+            {% for listing in approved_listings %}
+            <div class="listing-card">
+                <div>
+                    <h3>{{ listing[2] }}</h3> <!-- Listing Title -->
+                    <p><strong>Subject:</strong> {{ listing[2] }}</p>
+                    <p><strong>Date:</strong> {{ listing[3] }}</p> <!-- Lesson Date -->
+                    <p><strong>Time:</strong> {{ listing[4] }}</p> <!-- Lesson Time -->
+                    <p><strong>Price:</strong> ${{ listing[5] }}</p> <!-- Price -->
+                    <p><strong>Status:</strong> Approved</p>
+                </div>
+                <form action="{{ url_for('delete_listing', listing_id=listing[0]) }}" method="POST">
+                    <button type="submit" class="delete-btn">Delete</button>
+                </form>
+            </div>
+            {% endfor %}
+        {% else %}
+            <p>No approved listings yet.</p>
+        {% endif %}
+
+        <!-- Pending Listings -->
+        <div class="section-title">Pending Listings</div>
+        {% if all_pending_listings %}
+            {% for listing in all_pending_listings %}
+            <div class="listing-card">
+                <div>
+                    <h3>{{ listing[2] }}</h3> <!-- Listing Title -->
+                    <p><strong>Subject:</strong> {{ listing[2] }}</p>
+                    <p><strong>Date:</strong> {{ listing[3] }}</p> <!-- Lesson Date -->
+                    <p><strong>Time:</strong> {{ listing[4] }}</p> <!-- Lesson Time -->
+                    <p><strong>Price:</strong> ${{ listing[5] }}</p> <!-- Price -->
+                    <p><strong>Status:</strong> Pending</p>
+                </div>
+                <a href="{{ url_for('view_listing', listing_id=listing[0]) }}" class="btn">View Listing</a>
+            </div>
+            {% endfor %}
+        {% else %}
+            <p>No pending listings available.</p>
+        {% endif %}
     </div>
+
 </body>
 </html>
