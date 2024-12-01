@@ -1,17 +1,20 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard - TutorConnect</title>
     <style>
         /* General Reset */
-        body, html {
+        body,
+        html {
             margin: 0;
             padding: 0;
             font-family: 'Roboto', sans-serif;
             background-color: #fefefe;
-            overflow-x: hidden; /* Prevent horizontal scrolling */
+            overflow-x: hidden;
+            /* Prevent horizontal scrolling */
         }
 
         /* Dashboard Background */
@@ -22,7 +25,8 @@
             width: 100%;
             height: 100%;
             background: linear-gradient(to bottom right, #6C63FF, #3B3DFE, #FFFFFF);
-            z-index: -1; /* Ensure it stays behind content */
+            z-index: -1;
+            /* Ensure it stays behind content */
             overflow: hidden;
         }
 
@@ -68,9 +72,17 @@
         }
 
         @keyframes float {
-            0% { transform: translateY(0); }
-            50% { transform: translateY(-20px); }
-            100% { transform: translateY(0); }
+            0% {
+                transform: translateY(0);
+            }
+
+            50% {
+                transform: translateY(-20px);
+            }
+
+            100% {
+                transform: translateY(0);
+            }
         }
 
         /* Dashboard Header */
@@ -130,7 +142,8 @@
             height: 20px;
             text-align: center;
             line-height: 20px;
-            display: none; /* Show only if there are notifications */
+            display: none;
+            /* Show only if there are notifications */
         }
 
         .bell-icon[data-count]:after {
@@ -174,7 +187,8 @@
             flex-direction: column;
             align-items: center;
             padding: 50px 20px;
-            z-index: 1; /* Ensure it appears above the background */
+            z-index: 1;
+            /* Ensure it appears above the background */
         }
 
         .welcome-message {
@@ -260,11 +274,92 @@
             }
 
             .logo {
-                font-size: 1.5rem; /* Adjust logo size for smaller screens */
+                font-size: 1.5rem;
+                /* Adjust logo size for smaller screens */
+            }
+        }
+
+        /* Bookings Table */
+        .bookings-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            margin-bottom: 30px;
+        }
+
+        .bookings-table th,
+        .bookings-table td {
+            padding: 15px 20px;
+            text-align: left;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+        }
+
+        .bookings-table th {
+            background: linear-gradient(to right, #6C63FF, #3B3DFE);
+            color: white;
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.9rem;
+            letter-spacing: 0.5px;
+        }
+
+        .bookings-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .bookings-table tbody tr:hover {
+            background: rgba(108, 99, 255, 0.05);
+        }
+
+        .status-badge {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            display: inline-block;
+        }
+
+        .status-pending {
+            background: linear-gradient(45deg, #FFB75E, #ED8F03);
+            color: white;
+        }
+
+        .status-accepted {
+            background: linear-gradient(45deg, #00B09B, #96C93D);
+            color: white;
+        }
+
+        .status-completed {
+            background: linear-gradient(45deg, #3B3DFE, #6C63FF);
+            color: white;
+        }
+
+        .status-cancelled {
+            background: linear-gradient(45deg, #FF512F, #DD2476);
+            color: white;
+        }
+
+        .no-bookings {
+            text-align: center;
+            color: #666;
+            font-style: italic;
+            padding: 30px !important;
+        }
+
+        @media (max-width: 768px) {
+            .bookings-table {
+                display: block;
+                overflow-x: auto;
+                white-space: nowrap;
             }
         }
     </style>
 </head>
+
 <body>
     <!-- Background Shapes -->
     <div class="dashboard-background">
@@ -287,21 +382,48 @@
     <!-- Dashboard Content -->
     <div class="dashboard-content">
         <p class="welcome-message">Welcome, {{ username }}!</p>
-        <h2>Your Dashboard</h2>
+        <h2>Your Coach Dashboard</h2>
+        <div>
+            <h3>Upcoming Bookings</h3>
+            <table class="bookings-table">
+                <thead>
+                    <tr>
+                        <th>Subject</th>
+                        <th>Date</th>
+                        <th>Time</th>
+                        <th>Student</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% if bookings %}
+                    {% for booking in bookings %}
+                    <tr>
+                        <td>{{ booking.subject }}</td>
+                        <td>{{ booking.booking_date.strftime('%Y-%m-%d') }}</td>
+                        <td>{{ booking.booking_time.strftime('%H:%M') }}</td>
+                        <td>{{ booking.student_email }}</td>
+                        <td><span class="status-badge status-{{ booking.status|lower }}">{{ booking.status }}</span>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                    {% else %}
+                    <tr>
+                        <td colspan="5" class="no-bookings">No upcoming bookings found</td>
+                    </tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
         <div class="features-grid">
-            <!-- My Bookings -->
-            <a href="/my_bookings" class="feature-card">
-                <h3>My Bookings</h3>
-                <p>View and manage your upcoming tutoring sessions easily.</p>
-            </a>
-            <!-- My Listings -->
-            <a href="/listings" class="feature-card">
-                <h3>My Listings</h3>
-                <p>Create and manage your tutoring listings to connect with students.</p>
+            <!-- Requests -->
+            <a href="/coach/requests" class="feature-card">
+                <h3>All Requests</h3>
+                <p>Read and respond to reviews left by students and tutors.</p>
             </a>
             <!-- Reviews -->
             <a href="/reviews" class="feature-card">
-                <h3>Reviews</h3>
+                <h3>My Reviews</h3>
                 <p>Read and respond to reviews left by students and tutors.</p>
             </a>
             <!-- Live Chat -->
@@ -316,4 +438,5 @@
         &copy; 2024 TutorConnect. All rights reserved. <a href="/privacy">Privacy Policy</a>
     </footer>
 </body>
+
 </html>

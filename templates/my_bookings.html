@@ -1,11 +1,13 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>My Bookings - TutorConnect</title>
     <style>
-        body, html {
+        body,
+        html {
             margin: 0;
             padding: 0;
             font-family: 'Roboto', sans-serif;
@@ -137,8 +139,24 @@
         .create-booking-form button:hover {
             background: #3B3DFE;
         }
+
+        /* Additional Form Styles */
+        .create-booking-form textarea {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 15px;
+            font-size: 1rem;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            resize: vertical;
+        }
+
+        .create-booking-form select {
+            background-color: white;
+        }
     </style>
 </head>
+
 <body>
     <!-- Dashboard Header -->
     <header class="dashboard-header">
@@ -154,14 +172,14 @@
         <div class="booking-list">
             <ul>
                 {% if bookings %}
-                    {% for booking in bookings %}
-                        <li>
-                            <h4>{{ booking[1] }} ({{ booking[2] }})</h4>
-                            <p>Status: {{ booking[3] }}</p>
-                        </li>
-                    {% endfor %}
+                {% for booking in bookings %}
+                <li>
+                    <h4>{{ booking[1] }} ({{ booking[2] }})</h4>
+                    <p>Status: {{ booking[3] }}</p>
+                </li>
+                {% endfor %}
                 {% else %}
-                    <li>No bookings found.</li>
+                <li>No bookings found.</li>
                 {% endif %}
             </ul>
         </div>
@@ -170,21 +188,42 @@
         <h3>Create a New Booking</h3>
         <div class="create-booking-form">
             <form action="{{ url_for('create_booking') }}" method="POST">
-                <label for="coach_id">Coach ID:</label>
-                <input type="number" name="coach_id" id="coach_id" required><br>
+                <label for="subject">Subject:</label>
+                <select name="subject" id="subject" required>
+                    <option value="">Select a subject</option>
+                    <option value="mathematics">Mathematics</option>
+                    <option value="physics">Physics</option>
+                    <option value="chemistry">Chemistry</option>
+                    <option value="biology">Biology</option>
+                    <option value="computer_science">Computer Science</option>
+                    <option value="english">English</option>
+                    <option value="history">History</option>
+                    <option value="geography">Geography</option>
+                    <option value="foreign_languages">Foreign Languages</option>
+                    <option value="music">Music</option>
+                    <option value="art">Art</option>
+                </select><br>
 
-                <label for="listing_id">Listing ID:</label>
-                <input type="number" name="listing_id" id="listing_id" required><br>
-
-                <label for="booking_date">Booking Date:</label>
+                <label for="booking_date">Date:</label>
                 <input type="date" name="booking_date" id="booking_date" required><br>
 
+                <label for="booking_time">Time:</label>
+                <input type="time" name="booking_time" id="booking_time" required><br>
+
+                <label for="price">Price (per hour):</label>
+                <input type="number" name="price" id="price" min="0" step="0.01" required><br>
+
                 <label for="persons_booked">Number of Persons:</label>
-                <input type="number" name="persons_booked" id="persons_booked" required><br>
+                <input type="number" name="persons_booked" id="persons_booked" min="1" required><br>
+
+                <label for="description">Class Description:</label>
+                <textarea name="description" id="description" rows="4" required
+                    placeholder="Please describe what you'd like to learn in this class..."></textarea><br>
 
                 <button type="submit">Create Booking</button>
             </form>
         </div>
     </div>
 </body>
+
 </html>

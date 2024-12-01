@@ -1,5 +1,6 @@
 from flask import Flask, request, jsonify, render_template, current_app, redirect, url_for, session
 import psycopg2
+from psycopg2 import extras
 from werkzeug.security import generate_password_hash, check_password_hash
 import jwt
 import datetime
@@ -40,12 +41,16 @@ def get_db_connection():
 # Serve the Homepage
 @app.route('/')
 def home():
+    if 'user_id' in session:
+        return redirect("dashboard")
     return render_template('index.html')  # Homepage with navigation links
 
 
 # User Registration Page
 @app.route('/register')
 def register_page():
+    if 'user_id' in session:
+        return redirect("dashboard")
     return render_template('register.html')  # HTML form for user registration
 
 
@@ -91,6 +96,8 @@ def create_user():
 
 @app.route('/login', methods=['GET'])
 def login_page():
+    if 'user_id' in session:
+        return redirect("dashboard")
     return render_template('login.html')  # Renders the login form
 
 
@@ -212,9 +219,21 @@ def profile():
 
     return render_template('profile.html', user=user)
 
+def get_user_type(username):
+    try:
+        conn = get_db_connection()
+        cur = conn.cursor()
+        cur.execute("SELECT role FROM users WHERE username = %s", (username,))
+        user = cur.fetchone()
+        cur.close()
+        return user[0]
+    except Exception as e:
+        print(e)
+        return "student"
 
-@app.route('/dashboard', methods=['GET'])
-def dashboard():
+
+@app.route('/student', methods=['GET'])
+def student():
     # Ensure the user is logged in
     if 'user_id' not in session:
         return redirect(url_for('login_page'))  # Redirect to login if not authenticated
@@ -222,26 +241,21 @@ def dashboard():
     user_id = session['user_id']
     username = session['username']
 
+    user_type = get_user_type(username)
+    if user_type == "coach":
+        return redirect("/coach")
+
     try:
         conn = get_db_connection()
         cur = conn.cursor()
 
         # Fetch user-specific bookings
         cur.execute("""
-            SELECT b.id, l.title, b.booking_date, b.status 
+            SELECT b.id, b.booking_date, b.status 
             FROM bookings b
-            JOIN listings l ON b.listing_id = l.id
-            WHERE b.student_id = %s OR b.coach_id = %s
-        """, (user_id, user_id))
-        bookings = cur.fetchall()
-
-        # Fetch all listings created by the user
-        cur.execute("""
-            SELECT id, title, description, price, status 
-            FROM listings
-            WHERE user_id = %s
+            WHERE b.student_id = %s
         """, (user_id,))
-        listings = cur.fetchall()
+        bookings = cur.fetchall()
 
         cur.close()
         conn.close()
@@ -251,11 +265,85 @@ def dashboard():
             'dashboard.html',
             username=username,
             bookings=bookings,
-            listings=listings
         )
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
+@app.route('/coach', methods=['GET'])
+def coach():
+    if 'user_id' not in session:
+        return redirect(url_for('login_page'))
+
+    user_id = session['user_id']
+    username = session['username']
+
+    user_type = get_user_type(username)
+    if user_type == "student":
+        return redirect("/student")
+
+    try:
+        conn = get_db_connection()
+        cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+
+        # Modified query to join with users table
+        cur.execute("""
+            SELECT b.*, u.email as student_email
+            FROM bookings b
+            LEFT JOIN users u ON b.student_id = u.id
+            WHERE b.coach_id = %s
+        """, (user_id,))
+        bookings = cur.fetchall()
+
+        cur.close()
+        conn.close()
+
+        return render_template(
+            'coach.html',
+            username=username,
+            bookings=bookings,
+        )
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@app.route('/coach/requests', methods=['GET'])
+def coach_requests():
+    # Ensure the user is logged in
+    if 'user_id' not in session:
+        return redirect(url_for('login_page'))  # Redirect to login if not authenticated
+
+    user_id = session['user_id']
+    username = session['username']
+
+    user_type = get_user_type(username)
+    if user_type == "student":
+        return redirect("/student")
+
+    try:
+        conn = get_db_connection()
+        cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+
+        # Fetch user-specific bookings
+        cur.execute("""
+            SELECT *
+            FROM bookings
+            WHERE status = 'Pending'
+            AND (booking_date > CURRENT_DATE 
+                OR (booking_date = CURRENT_DATE AND booking_time > CURRENT_TIME))
+            ORDER BY booking_date ASC, booking_time ASC;
+        """, ())
+
+        bookings = cur.fetchall()
+
+        cur.close()
+        conn.close()
+
+        # Pass data to the template
+        return render_template(
+            'coach/requests.html',
+            bookings=bookings,
+        )
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 # Listings Page
 @app.route('/listings', methods=['GET'])
@@ -370,9 +458,8 @@ def my_bookings():
 
         # Fetch user's bookings
         query = """
-        SELECT b.id, l.title, b.booking_date, b.status
+        SELECT b.id, b.booking_date, b.status
         FROM bookings b
-        JOIN listings l ON b.listing_id = l.id
         WHERE b.student_id = %s
         """
         cur.execute(query, (user_id,))
@@ -391,22 +478,37 @@ def my_bookings():
 @app.route('/create_booking', methods=['GET', 'POST'])
 def create_booking():
     if 'user_id' not in session:
-        return redirect(url_for('login'))  # Redirect to login if not authenticated
+        return redirect(url_for('login'))
 
     if request.method == 'POST':
-        user_id = session['user_id']
-        coach_id = request.form['coach_id']
-        listing_id = request.form['listing_id']
-        booking_date = request.form['booking_date']
-        persons_booked = request.form['persons_booked']
-
         try:
+            # Extract all form data
+            student_id = session['user_id']
+            subject = request.form['subject']
+            booking_date = request.form['booking_date']
+            booking_time = request.form['booking_time']
+            price = request.form['price']
+            persons_booked = request.form['persons_booked']
+            description = request.form['description']
+
             conn = get_db_connection()
             cur = conn.cursor()
+            
+            # Insert the booking with all required fields
             cur.execute("""
-            INSERT INTO bookings (student_id, coach_id, listing_id, booking_date, persons_booked, status)
-            VALUES (%s, %s, %s, %s, %s, 'Pending')
-            """, (user_id, coach_id, listing_id, booking_date, persons_booked))
+            INSERT INTO bookings (
+                student_id, booking_date, booking_time, 
+                price, subject, description, status, 
+                persons_booked
+            ) VALUES (
+                %s, %s, %s, %s, %s, %s, 'Pending', %s
+            )
+            """, (
+                student_id, booking_date, booking_time,
+                price, subject, description,
+                persons_booked
+            ))
+            
             conn.commit()
             cur.close()
             conn.close()
@@ -417,6 +519,49 @@ def create_booking():
             return jsonify({"error": str(e)}), 400
 
     return render_template('create_booking.html')
+
+
+@app.route('/booking/accept', methods=['POST'])
+def accept_booking():
+    if 'user_id' not in session:
+        return redirect(url_for('login_page'))
+
+    user_id = session['user_id']
+    booking_id = request.form.get('id')
+
+    try:
+        conn = get_db_connection()
+        cur = conn.cursor()
+
+        # First verify this coach has permission to accept this booking
+        cur.execute("""
+            SELECT status 
+            FROM bookings 
+            WHERE id = %s AND status = 'Pending'
+        """, (booking_id,))
+        
+        booking = cur.fetchone()
+        if not booking:
+            return jsonify({"error": "Booking not found or already processed"}), 400
+
+        # Update the booking status to Accepted
+        cur.execute("""
+            UPDATE bookings 
+            SET status = 'Accepted', 
+                coach_id = %s,
+                updated_at = CURRENT_TIMESTAMP
+            WHERE id = %s
+        """, (user_id, booking_id))
+
+        conn.commit()
+        cur.close()
+        conn.close()
+
+        # Redirect back to the requests page
+        return redirect(url_for('coach_requests'))
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 
 if __name__ == "__main__":
