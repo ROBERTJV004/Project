@@ -45,6 +45,11 @@ def home():
         return redirect("dashboard")
     return render_template('index.html')  # Homepage with navigation links
 
+@app.route('/dashboard')
+def dashboard():
+    if 'user_id' in session:
+        return render_template('dashboard.html')  # Homepage with navigation links
+    return redirect("login")
 
 # User Registration Page
 @app.route('/register')
@@ -97,7 +102,7 @@ def create_user():
 @app.route('/login', methods=['GET'])
 def login_page():
     if 'user_id' in session:
-        return redirect("dashboard")
+        return redirect("/")
     return render_template('login.html')  # Renders the login form
 
 
