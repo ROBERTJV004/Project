@@ -2,7 +2,7 @@ from flask import Blueprint, render_template, request, redirect, session, jsonif
 from werkzeug.security import check_password_hash, generate_password_hash
 
 from app.models import Bookings, Users
-from .helpers import get_account_type, login_required, get_db
+from .helpers import get_account_type, login_required
 from datetime import datetime
 
 # Create a Blueprint instead of a Flask app
@@ -33,89 +33,69 @@ def student():
     username = session["username"]
     return render_template("student.html", username=username)
 
-@main.route("/register", methods=["GET", "POST"])
-def register():
-    if request.method == "POST":
-        username = request.form.get("username")
-        password = request.form.get("password")
-        confirmation = request.form.get("confirmation")
-        
-        # Ensure username was submitted
-        if not username:
-            return render_template("register.html", error="Must provide username")
-        
-        # Ensure password was submitted
-        if not password:
-            return render_template("register.html", error="Must provide password")
-        
-        # Ensure confirmation was submitted
-        if not confirmation:
-            return render_template("register.html", error="Must provide confirmation")
-        
-        # Ensure password and confirmation match
-        if password != confirmation:
-            return render_template("register.html", error="Passwords must match")
-        
-        db = get_db()
-        
-        # Check if username already exists
-        if db.execute("SELECT * FROM users WHERE username = ?", (username,)).fetchone():
-            return render_template("register.html", error="Username already exists")
-        
-        # Insert new user into database
-        db.execute(
-            "INSERT INTO users (username, hash) VALUES (?, ?)",
-            (username, generate_password_hash(password))
-        )
-        db.commit()
-        
-        # Redirect to login page
-        return redirect("/login")
-    
-    return render_template("register.html")
+@main.route("/register", methods=["GET"])
+def register_page():
+    if 'user_id' in session:
+        return redirect("dashboard")
+    return render_template('register.html')
 
-@main.route("/login", methods=["GET", "POST"])
+@main.route('/login', methods=['GET', 'POST'])
 def login():
-    # Forget any user_id
-    session.clear()
-    
-    if request.method == "POST":
-        username = request.form.get("username")
-        password = request.form.get("password")
+    try:
+        if 'user_id' in session:
+            return redirect("/")
         
-        # Ensure username was submitted
-        if not username:
-            return render_template("login.html", error="Must provide username")
+        if request.method == 'GET':
+            return render_template('login.html')
         
-        # Ensure password was submitted
-        if not password:
-            return render_template("login.html", error="Must provide password")
-        
-        db = get_db()
-        
-        # Query database for username
-        user = db.execute(
-            "SELECT * FROM users WHERE username = ?", (username,)
-        ).fetchone()
-        
-        # Ensure username exists and password is correct
-        if not user or not check_password_hash(user["hash"], password):
-            return render_template("login.html", error="Invalid username and/or password")
-        
-        # Remember which user has logged in
-        session["user_id"] = user["id"]
-        
-        # Redirect user to home page
+        email = request.form['email']
+        password = request.form['password']
+
+        user = Users.query.filter_by(email=email).first()
+
+        if not user:
+            error = "Invalid email or password"
+            return render_template('login.html', error=error)
+
+        if not check_password_hash(user.password, password):
+            error = "Invalid email or password"
+            return render_template('login.html', error=error)
+
+        session['user_id'] = user.id
+        session['username'] = user.username
+
         return redirect("/")
-    
-    return render_template("login.html")
+
+    except Exception as e:
+        error = f"An error occurred: {e}"
+        return render_template('login.html', error=error)
+
+@main.route('/users', methods=['POST'])
+def create_user():
+    try:
+        username = request.form.get('username')
+        email = request.form.get('email')
+        role = request.form.get('role')
+        password = generate_password_hash(request.form.get('password'))
+
+        if not username or not email or not role or not password:
+            return jsonify({"error": "Missing required fields"}), 400
+
+        Users.query.insert(username, email, role, password).commit()
+        user = Users.query.filter_by(username=username).first()
+
+        session['user_id'] = user.id
+        session['username'] = username
+
+        return redirect("/")
+
+    except Exception as e:
+        return render_template('register.html', error=str(e))
 
 @main.route("/logout")
 def logout():
-    # Forget any user_id
     session.clear()
     
-    # Redirect user to login form
     return redirect("/")
 
 @main.route("/chat", methods=["POST"])

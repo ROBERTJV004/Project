@@ -9,8 +9,10 @@ from flask import (
     session,
     url_for
 )
+from flask_socketio import SocketIO, join_room, leave_room, send
 import os
 import psycopg2
+from psycopg2 import extras
 from werkzeug.security import check_password_hash, generate_password_hash
 from werkzeug.utils import secure_filename
 
@@ -84,54 +86,6 @@ def register_page():
     return render_template('register.html')  # HTML form for user registration
 
 
-# Handle User Registration (POST API)
-from werkzeug.security import generate_password_hash
-
-
-@app.route('/users', methods=['POST'])
-def create_user():
-    try:
-        # Retrieve form data
-        username = request.form.get('username')
-        email = request.form.get('email')
-        role = request.form.get('role')
-        password = generate_password_hash(request.form.get('password'))  # Hash the password
-
-        if not username or not email or not role or not password:
-            return jsonify({"error": "Missing required fields"}), 400
-
-        query = """
-        INSERT INTO users (username, email, role, password)
-        VALUES (%s, %s, %s, %s)
-        RETURNING id;
-        """
-        conn = get_db_connection()
-        cur = conn.cursor()
-        cur.execute(query, (username, email, role, password))
-        user_id = cur.fetchone()[0]
-        conn.commit()
-        cur.close()
-        conn.close()
-
-        # Store the user in the session
-        session['user_id'] = user_id
-        session['username'] = username
-
-        # Redirect to the dashboard
-        return redirect(url_for('login'))
-
-    except Exception as e:
-        return render_template('register.html', error=str(e))
-
-
-@app.route('/login', methods=['GET'])
-def login_page():
-    if 'user_id' in session:
-        return redirect("/")
-    return render_template('login.html')  # Renders the login form
-
-
-# Handle User Login (POST API)
 from werkzeug.security import check_password_hash
 
 from flask import redirect, url_for, session

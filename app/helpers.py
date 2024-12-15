@@ -4,16 +4,12 @@ from flask import redirect, session, url_for
 
 from app.models import Users
 
-
-def get_db():
-    return db
-
 def login_required(f=None, *, account_type=None):
     def decorator(f):
         @wraps(f)
         def decorated_function(*args, **kwargs):
             if not session.get("user_id"):
-                return redirect(url_for("login"))
+                return redirect("/login")
             
             if account_type:
                 user = Users.query.get(session["user_id"])
