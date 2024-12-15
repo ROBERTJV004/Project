@@ -9,7 +9,6 @@ from .helpers import get_account_type, login_required
 from datetime import datetime
 from app import db
 
-# Create a Blueprint instead of a Flask app
 main = Blueprint('main', __name__)
 
 @main.route("/")
