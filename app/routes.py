@@ -1,7 +1,10 @@
-from flask import Blueprint, render_template, request, redirect, session, jsonify
+import os
+from flask import Blueprint, current_app, render_template, request, redirect, session, jsonify
 from werkzeug.security import check_password_hash, generate_password_hash
+from werkzeug.utils import secure_filename
 
 from app.models import Bookings, Users
+from project import allowed_file
 from .helpers import get_account_type, login_required
 from datetime import datetime
 from app import db
@@ -111,6 +114,43 @@ def logout():
     session.clear()
     
     return redirect("/")
+
+@main.route("/profile", methods=["GET", "POST"])
+@login_required(account_type="student") 
+def profile():
+    user_id = session["user_id"]
+
+    if request.method == "POST":
+        description = request.form.get("description", "")
+        profile_picture = request.files.get("profile_picture")
+
+        # Handle profile picture upload
+        if profile_picture and allowed_file(profile_picture.filename):
+            filename = secure_filename(str(profile_picture.filename))
+            filepath = os.path.join(current_app.config["UPLOAD_FOLDER"], filename)
+            profile_picture.save(filepath)
+
+            # Update profile picture path in database
+            user = Users.query.get(user_id)
+            user.profile_picture = f"/static/uploads/{filename}"
+            db.session.commit()
+
+        # Update description in database
+        user = Users.query.get(user_id)
+        user.description = description
+        db.session.commit()
+
+        return redirect("/profile")
+
+    # Get user data for profile page
+    user = Users.query.with_entities(
+        Users.username,
+        Users.email, 
+        Users.description,
+        Users.profile_picture
+    ).filter_by(id=user_id).first()
+
+    return render_template("profile.html", user=user)
 
 @main.route("/student/create_booking", methods=["GET"])
 @login_required(account_type="student")

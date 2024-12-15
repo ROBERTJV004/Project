@@ -1,8 +1,19 @@
 from functools import wraps
+import os
 
 from flask import redirect, session, url_for
 
 from app.models import Users
+
+UPLOAD_FOLDER = 'static/uploads'
+ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg'}
+
+if not os.path.exists(UPLOAD_FOLDER):
+    os.makedirs(UPLOAD_FOLDER)
+
+
+def allowed_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 def login_required(f=None, *, account_type=None):
     def decorator(f):
