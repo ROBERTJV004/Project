@@ -482,7 +482,7 @@
                     </div>
                     {% if booking.status|lower == 'pending' %}
                     <div class="detail-item" style="grid-column: 1 / -1;">
-                        <form action="/booking/accept" method="POST" style="width: 100%;">
+                        <form action="/coach/requests/accept" method="POST" style="width: 100%;">
                             <input type="hidden" name="id" value="{{ booking.id }}">
                             <button type="submit" class="accept-btn">Accept Booking</button>
                         </form>

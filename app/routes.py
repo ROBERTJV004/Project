@@ -192,3 +192,52 @@ def my_bookings():
 
     except Exception as e:
         return jsonify({"error": str(e)}), 400
+
+@main.route("/coach/requests", methods=["GET"])
+@login_required(account_type="coach")
+def coach_requests():
+    try:
+        # Fetch pending bookings that haven't passed yet
+        bookings = [{
+            'id': booking.id,
+            'student_id': booking.student_id,
+            'subject': booking.subject,
+            'booking_date': booking.booking_date.strftime('%Y-%m-%d'),
+            'booking_time': booking.booking_time.strftime('%H:%M'),
+            'price': float(booking.price),
+            'persons_booked': booking.persons_booked,
+            'description': booking.description,
+            'status': booking.status
+        } for booking in Bookings.query.filter(
+            Bookings.status == 'Pending',
+            (Bookings.booking_date > datetime.now().date()) |
+            ((Bookings.booking_date == datetime.now().date()) & 
+             (Bookings.booking_time > datetime.now().time()))
+        ).order_by(Bookings.booking_date.asc(), Bookings.booking_time.asc()).all()]
+
+        return render_template("coach/requests.html", bookings=bookings)
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+    
+@main.route("/coach/requests/accept", methods=["POST"])
+@login_required(account_type="coach") 
+def accept_request():
+    try:
+        booking_id = request.form.get("id")
+        
+        # Verify booking exists and is pending
+        booking = Bookings.query.filter_by(id=booking_id, status='Pending').first()
+        if not booking:
+            return jsonify({"error": "Booking not found or already processed"}), 400
+
+        # Update booking status and coach
+        booking.status = 'Accepted'
+        booking.coach_id = session['user_id']
+        booking.updated_at = datetime.now()
+        
+        db.session.commit()
+
+        return redirect("/coach/requests")
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
