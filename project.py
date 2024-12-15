@@ -1,12 +1,18 @@
-from flask import Flask, request, jsonify, render_template, current_app, redirect, url_for, session
-import psycopg2
-from psycopg2 import extras
-from werkzeug.security import generate_password_hash, check_password_hash
-import jwt
-import datetime
+from datetime import datetime
+from flask import (
+    Flask,
+    current_app,
+    jsonify,
+    redirect,
+    render_template,
+    request,
+    session,
+    url_for
+)
 import os
+import psycopg2
+from werkzeug.security import check_password_hash, generate_password_hash
 from werkzeug.utils import secure_filename
-from flask_socketio import SocketIO, join_room, leave_room, send
 
 UPLOAD_FOLDER = 'static/uploads'
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg'}
