@@ -37,18 +37,37 @@ def get_db_connection():
         print(f"Database connection error: {e}")
         raise e
 
+def get_user_type(username):
+    try:
+        conn = get_db_connection()
+        cur = conn.cursor()
+        cur.execute("SELECT role FROM users WHERE username = %s", (username,))
+        user = cur.fetchone()
+        cur.close()
+        return user[0]
+    except Exception as e:
+        print(e)
+        return "student"
 
 # Serve the Homepage
 @app.route('/')
 def home():
     if 'user_id' in session:
-        return redirect("dashboard")
+        user_type = get_user_type(session['username'])
+        if user_type == "coach":
+            return redirect("coach")
+        else:
+            return redirect("student")
     return render_template('index.html')  # Homepage with navigation links
 
 @app.route('/dashboard')
 def dashboard():
     if 'user_id' in session:
-        return render_template('dashboard.html')  # Homepage with navigation links
+        user_type = get_user_type(session['username'])
+        if user_type == "coach":
+            return redirect("coach")
+        else:
+            return redirect("student")
     return redirect("login")
 
 # User Registration Page
@@ -93,7 +112,7 @@ def create_user():
         session['username'] = username
 
         # Redirect to the dashboard
-        return redirect(url_for('dashboard'))
+        return redirect(url_for('login'))
 
     except Exception as e:
         return render_template('register.html', error=str(e))
@@ -224,17 +243,6 @@ def profile():
 
     return render_template('profile.html', user=user)
 
-def get_user_type(username):
-    try:
-        conn = get_db_connection()
-        cur = conn.cursor()
-        cur.execute("SELECT role FROM users WHERE username = %s", (username,))
-        user = cur.fetchone()
-        cur.close()
-        return user[0]
-    except Exception as e:
-        print(e)
-        return "student"
 
 
 @app.route('/student', methods=['GET'])
