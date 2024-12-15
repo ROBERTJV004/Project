@@ -112,67 +112,43 @@ def logout():
     
     return redirect("/")
 
-@main.route("/chat", methods=["POST"])
-@login_required
-def chat():
-    user_message = request.json.get("message")
-    chat_id = request.json.get("chat_id")
-    
-    if not user_message:
-        return jsonify({"error": "Message is required"}), 400
-    
-    db = get_db()
-    user_id = session["user_id"]
-    
-    # If no chat_id, create new chat
-    if not chat_id:
-        chat_id = db.execute(
-            "INSERT INTO chats (user_id, timestamp) VALUES (?, ?)",
-            (user_id, datetime.now())
-        ).lastrowid
-        db.commit()
-    
-    # Store user message
-    db.execute(
-        "INSERT INTO messages (chat_id, role, content, timestamp) VALUES (?, ?, ?, ?)",
-        (chat_id, "user", user_message, datetime.now())
-    )
-    db.commit()
-    
-    # Get AI response
-    ai_message = "This is a placeholder AI response"
-    
-    # Store AI response
-    db.execute(
-        "INSERT INTO messages (chat_id, role, content, timestamp) VALUES (?, ?, ?, ?)",
-        (chat_id, "assistant", ai_message, datetime.now())
-    )
-    db.commit()
-    
-    return jsonify({
-        "chat_id": chat_id,
-        "response": ai_message
-    })
+@main.route("/student/create_booking", methods=["GET"])
+@login_required(account_type="student")
+def create_booking():
+    return render_template("student/create_booking.html")
 
-@main.route("/history/<int:chat_id>")
-@login_required
-def history(chat_id):
-    db = get_db()
-    user_id = session["user_id"]
+@main.route("/student/my_bookings", methods=["GET", "POST"])
+@login_required(account_type="student")
+def my_bookings():
+    if request.method == "GET":
+        user_id = session["user_id"]
+        bookings = Bookings.query.with_entities(Bookings.id, Bookings.booking_date, Bookings.status).filter_by(student_id=user_id).all()
+        return render_template("student/my_bookings.html", bookings=bookings)
     
-    # Verify chat belongs to user
-    chat = db.execute(
-        "SELECT * FROM chats WHERE id = ? AND user_id = ?",
-        (chat_id, user_id)
-    ).fetchone()
-    
-    if not chat:
-        return jsonify({"error": "Chat not found"}), 404
-    
-    # Get chat messages
-    messages = db.execute(
-        "SELECT role, content FROM messages WHERE chat_id = ? ORDER BY timestamp",
-        (chat_id,)
-    ).fetchall()
-    
-    return jsonify([dict(message) for message in messages]) 
+    try:
+        # Extract all form data
+        student_id = session['user_id']
+        subject = request.form['subject']
+        booking_date = request.form['booking_date']
+        booking_time = request.form['booking_time']
+        price = request.form['price']
+        persons_booked = request.form['persons_booked']
+        description = request.form['description']
+
+        booking = Bookings(
+            student_id=student_id,
+            subject=subject,
+            booking_date=booking_date,
+            booking_time=booking_time,
+            price=price,
+            persons_booked=persons_booked,
+            description=description
+        ) 
+
+        db.session.add(booking)
+        db.session.commit()
+
+        return redirect("/student/my_bookings")
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 400

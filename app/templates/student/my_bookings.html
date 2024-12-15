@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Bookings - TutorConnect</title>
+    <style>
+        /* General Reset */
+        body,
+        html {
+            margin: 0;
+            padding: 0;
+            font-family: 'Roboto', sans-serif;
+            background-color: #fefefe;
+            overflow-x: hidden;
+        }
+
+        /* Dashboard Background */
+        .dashboard-background {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(to bottom right, #6C63FF, #3B3DFE, #FFFFFF);
+            z-index: -1;
+            overflow: hidden;
+        }
+
+        /* Floating Shapes */
+        .shape {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            z-index: -1;
+            animation: float 8s ease-in-out infinite;
+        }
+
+        .shape:nth-child(1) {
+            top: 10%;
+            left: 15%;
+            width: 120px;
+            height: 120px;
+            animation-delay: 1s;
+        }
+
+        .shape:nth-child(2) {
+            bottom: 20%;
+            right: 10%;
+            width: 180px;
+            height: 180px;
+            animation-delay: 2s;
+        }
+
+        .shape:nth-child(3) {
+            top: 50%;
+            left: 60%;
+            width: 80px;
+            height: 80px;
+            animation-delay: 3s;
+        }
+
+        .shape:nth-child(4) {
+            bottom: 10%;
+            left: 25%;
+            width: 150px;
+            height: 150px;
+            animation-delay: 4s;
+        }
+
+        @keyframes float {
+            0% {
+                transform: translateY(0);
+            }
+
+            50% {
+                transform: translateY(-20px);
+            }
+
+            100% {
+                transform: translateY(0);
+            }
+        }
+
+        /* Dashboard Header */
+        .dashboard-header {
+            background: linear-gradient(to right, #6C63FF, #3B3DFE);
+            padding: 20px 50px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            color: white;
+            border-radius: 0 0 15px 15px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Logo */
+        .logo {
+            font-size: 1.8rem;
+            font-weight: 800;
+            color: #ffffff;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            background: linear-gradient(90deg, #FF4757, #FBC531);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-decoration: none;
+        }
+
+        /* Main Content */
+        .content-container {
+            padding: 50px 20px;
+            z-index: 1;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            color: #3B3DFE;
+            margin-bottom: 40px;
+            text-align: center;
+        }
+
+        h3 {
+            font-size: 1.8rem;
+            color: #3B3DFE;
+            margin-bottom: 20px;
+        }
+
+        /* Booking List */
+        .booking-list {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            margin-bottom: 40px;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .booking-list:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .booking-list ul {
+            list-style-type: none;
+            padding: 0;
+        }
+
+        .booking-list li {
+            padding: 20px;
+            border-bottom: 1px solid #f2f2f2;
+            transition: background-color 0.3s ease;
+        }
+
+        .booking-list li:hover {
+            background-color: #f8f9fa;
+        }
+
+        .booking-list li:last-child {
+            border-bottom: none;
+        }
+
+        .booking-list h4 {
+            font-size: 1.4rem;
+            margin-bottom: 10px;
+            color: #3B3DFE;
+        }
+
+        .booking-list p {
+            font-size: 1.1rem;
+            color: #666;
+            margin: 5px 0;
+        }
+
+        /* Create Booking Form */
+        .create-booking-form {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .create-booking-form:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .create-booking-form label {
+            font-size: 1.1rem;
+            color: #333;
+            margin-bottom: 10px;
+            display: block;
+        }
+
+        .create-booking-form input,
+        .create-booking-form select,
+        .create-booking-form textarea {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 20px;
+            font-size: 1rem;
+            border: 2px solid #e1e1e1;
+            border-radius: 8px;
+            transition: border-color 0.3s ease;
+        }
+
+        .create-booking-form input:focus,
+        .create-booking-form select:focus,
+        .create-booking-form textarea:focus {
+            outline: none;
+            border-color: #3B3DFE;
+        }
+
+        .create-booking-form button {
+            width: 100%;
+            padding: 15px 30px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            color: white;
+            background: linear-gradient(to right, #6C63FF, #3B3DFE);
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .create-booking-form button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(59, 61, 254, 0.4);
+        }
+
+        .create-booking-form textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Dashboard Background with Floating Shapes -->
+    <div class="dashboard-background">
+        <div class="shape"></div>
+        <div class="shape"></div>
+        <div class="shape"></div>
+        <div class="shape"></div>
+    </div>
+
+    <!-- Dashboard Header -->
+    <header class="dashboard-header">
+        <a href="/" class="logo">TutorConnect</a>
+    </header>
+
+    <!-- Main Content -->
+    <div class="content-container">
+        <h1>My Bookings</h1>
+
+        <!-- Bookings List Section -->
+        <h3>Upcoming Bookings</h3>
+        <div class="booking-list">
+            <ul>
+                {% if bookings %}
+                {% for booking in bookings %}
+                <li>
+                    <h4>{{ booking[1] }} ({{ booking[2] }})</h4>
+                    <p>Status: {{ booking[3] }}</p>
+                </li>
+                {% endfor %}
+                {% else %}
+                <li>No bookings found.</li>
+                {% endif %}
+            </ul>
+        </div>
+
+        <!-- Create Booking Section -->
+        <h3>Create a New Booking</h3>
+        <div class="create-booking-form">
+            <form action="" method="POST">
+                <label for="subject">Subject:</label>
+                <select name="subject" id="subject" required>
+                    <option value="">Select a subject</option>
+                    <option value="mathematics">Mathematics</option>
+                    <option value="physics">Physics</option>
+                    <option value="chemistry">Chemistry</option>
+                    <option value="biology">Biology</option>
+                    <option value="computer_science">Computer Science</option>
+                    <option value="english">English</option>
+                    <option value="history">History</option>
+                    <option value="geography">Geography</option>
+                    <option value="foreign_languages">Foreign Languages</option>
+                    <option value="music">Music</option>
+                    <option value="art">Art</option>
+                </select>
+
+                <label for="booking_date">Date:</label>
+                <input type="date" name="booking_date" id="booking_date" required>
+
+                <label for="booking_time">Time:</label>
+                <input type="time" name="booking_time" id="booking_time" required>
+
+                <label for="price">Price (per hour):</label>
+                <input type="number" name="price" id="price" min="0" step="0.01" required>
+
+                <label for="persons_booked">Number of Persons:</label>
+                <input type="number" name="persons_booked" id="persons_booked" min="1" required>
+
+                <label for="description">Class Description:</label>
+                <textarea name="description" id="description" rows="4" required
+                    placeholder="Please describe what you'd like to learn in this class..."></textarea>
+
+                <button type="submit">Create Booking</button>
+            </form>
+        </div>
+    </div>
+</body>
+
+</html>
