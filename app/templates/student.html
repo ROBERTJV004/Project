@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Welcome to TutorConnect</title>
+    <title>Dashboard - TutorConnect</title>
     <style>
         /* General Reset */
         body, html {
@@ -11,49 +11,27 @@
             padding: 0;
             font-family: 'Roboto', sans-serif;
             background-color: #fefefe;
-            color: #333;
-            scroll-behavior: smooth;
+            overflow-x: hidden; /* Prevent horizontal scrolling */
         }
 
-        /* Header Section for Logo */
-        .header {
-            position: absolute;
-            top: 20px;
-            left: 20px;
-            z-index: 10;
-        }
-
-        .logo {
-            font-size: 1.8rem;
-            font-weight: 800;
-            color: #ffffff;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            background: linear-gradient(90deg, #ff4757, #fbc531);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-
-        /* Hero Section */
-        .hero {
-            position: relative;
-            height: 100vh;
-            background: linear-gradient(to bottom, #6C63FF, #3B3DFE, rgba(255, 255, 255, 0));
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            text-align: left;
-            padding: 50px;
-            color: white;
+        /* Dashboard Background */
+        .dashboard-background {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(to bottom right, #6C63FF, #3B3DFE, #FFFFFF);
+            z-index: -1; /* Ensure it stays behind content */
             overflow: hidden;
         }
 
-        /* Floating Shapes for Background Animation */
+        /* Floating Shapes */
         .shape {
             position: absolute;
             background: rgba(255, 255, 255, 0.2);
             border-radius: 50%;
-            z-index: 1;
+            z-index: -1;
             animation: float 8s ease-in-out infinite;
         }
 
@@ -62,7 +40,7 @@
             left: 15%;
             width: 120px;
             height: 120px;
-            animation-delay: 0s;
+            animation-delay: 1s;
         }
 
         .shape:nth-child(2) {
@@ -74,200 +52,190 @@
         }
 
         .shape:nth-child(3) {
-            top: 40%;
+            top: 50%;
             left: 60%;
             width: 80px;
             height: 80px;
-            animation-delay: 4s;
+            animation-delay: 3s;
         }
 
         .shape:nth-child(4) {
-            top: 70%;
-            right: 25%;
+            bottom: 10%;
+            left: 25%;
             width: 150px;
             height: 150px;
-            animation-delay: 6s;
-        }
-
-        /* Animated Icons */
-        .icon {
-            position: absolute;
-            z-index: 1;
-            animation: floatIcons 12s ease-in-out infinite;
-            opacity: 0.8;
-        }
-
-        .icon img {
-            width: 60px;
-        }
-
-        .icon:nth-child(5) {
-            top: 30%;
-            left: 20%;
-            animation-delay: 0s;
-        }
-
-        .icon:nth-child(6) {
-            top: 50%;
-            left: 70%;
-            animation-delay: 2s;
-        }
-
-        .icon:nth-child(7) {
-            bottom: 15%;
-            left: 40%;
             animation-delay: 4s;
         }
 
-        .icon:nth-child(8) {
-            top: 10%;
-            right: 15%;
-            animation-delay: 6s;
-        }
-
-        .icon:nth-child(9) {
-            bottom: 25%;
-            right: 20%;
-            animation-delay: 8s;
-        }
-
         @keyframes float {
-            0% { transform: translateY(0) translateX(0); }
-            50% { transform: translateY(-20px) translateX(20px); }
-            100% { transform: translateY(0) translateX(0); }
+            0% { transform: translateY(0); }
+            50% { transform: translateY(-20px); }
+            100% { transform: translateY(0); }
         }
 
-        @keyframes floatIcons {
-            0% { transform: translateY(0) translateX(0); }
-            50% { transform: translateY(-15px) translateX(15px); }
-            100% { transform: translateY(0) translateX(0); }
+        /* Dashboard Header */
+        .dashboard-header {
+            background: linear-gradient(to right, #6C63FF, #3B3DFE);
+            padding: 20px 50px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            color: white;
+            border-radius: 0 0 15px 15px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
         }
 
-        .hero .content {
-            max-width: 600px;
-            z-index: 2;
+        .dashboard-header h1 {
+            font-size: 1.8rem;
+            margin: 0;
         }
 
-        .hero h1 {
-            font-size: 4rem;
-            font-weight: 700;
-            line-height: 1.2;
-            margin-bottom: 20px;
-        }
-
-        .hero p {
-            font-size: 1.25rem;
-            line-height: 1.8;
-            margin-bottom: 30px;
-        }
-
-        .hero .buttons a {
-            display: inline-block;
-            margin: 10px;
-            padding: 15px 30px;
-            font-size: 1rem;
-            font-weight: 500;
-            color: #fff;
+        /* Logo */
+        .logo {
+            font-size: 1.8rem;
+            font-weight: 800;
+            color: #ffffff;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            background: linear-gradient(90deg, #FF4757, #FBC531);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
             text-decoration: none;
-            background-color: #ff4757;
-            border-radius: 30px;
-            transition: all 0.3s ease;
         }
 
-        .hero .buttons a:hover {
-            background-color: #e84118;
+        /* Notification Bell */
+        .bell-icon {
+            font-size: 1.8rem;
+            color: white;
+            margin-right: 15px;
+            cursor: pointer;
+            position: relative;
         }
 
-        /* Features Section */
-        .features {
-            padding: 100px 20px;
+        .bell-icon:hover {
+            color: #FF4757;
+        }
+
+        .bell-icon::after {
+            content: attr(data-count);
+            position: absolute;
+            top: -5px;
+            right: -10px;
+            background: #FF4757;
+            color: white;
+            font-size: 0.8rem;
+            font-weight: bold;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            text-align: center;
+            line-height: 20px;
+            display: none; /* Show only if there are notifications */
+        }
+
+        .bell-icon[data-count]:after {
+            display: inline-block;
+        }
+
+        .dashboard-header .actions {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .dashboard-header .btn {
+            padding: 10px 20px;
+            font-size: 1rem;
+            font-weight: bold;
+            color: white;
+            text-decoration: none;
+            border-radius: 20px;
+            background: #FF4757;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .dashboard-header .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .dashboard-header .btn-secondary {
+            background: #FBC531;
+        }
+
+        .dashboard-header .btn-secondary:hover {
+            background: #E1B12C;
+        }
+
+        /* Main Content */
+        .dashboard-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 50px 20px;
+            z-index: 1; /* Ensure it appears above the background */
+        }
+
+        .welcome-message {
+            font-size: 2rem;
+            color: #3B3DFE;
+            margin-bottom: 20px;
             text-align: center;
         }
 
-        .features h2 {
+        .dashboard-content h2 {
             font-size: 2.5rem;
-            font-weight: 700;
-            color: #333;
-            margin-bottom: 50px;
+            color: #3B3DFE;
+            margin-bottom: 40px;
         }
 
+        /* Dashboard Features */
         .features-grid {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
             gap: 30px;
-            position: relative;
         }
 
         .feature-card {
             background: white;
-            padding: 30px;
             border-radius: 15px;
-            width: 280px;
-            text-align: left;
+            padding: 30px;
+            text-align: center;
             box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-            cursor: pointer;
-            transition: all 0.3s ease;
-            overflow: hidden;
-            position: relative;
-            z-index: 1;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            text-decoration: none;
+            color: #333;
         }
 
-        .feature-card img {
-            width: 50px;
-            margin-bottom: 15px;
-            transition: transform 0.3s ease;
+        .feature-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
         }
 
         .feature-card h3 {
-            font-size: 1.25rem;
-            font-weight: 600;
-            color: #333;
-            margin-bottom: 10px;
+            font-size: 1.5rem;
+            color: #3B3DFE;
+            margin-bottom: 15px;
         }
 
         .feature-card p {
             font-size: 1rem;
             color: #666;
             line-height: 1.6;
-            transition: opacity 0.3s ease;
-        }
-
-        .feature-card .extra-info {
-            display: none;
-            margin-top: 20px;
-            font-size: 1rem;
-            color: #444;
-            opacity: 0;
-            transition: opacity 0.3s ease;
-        }
-
-        /* Hover Expansion */
-        .feature-card:hover {
-            transform: scale(1.2);
-            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.3);
-            z-index: 10;
-        }
-
-        .feature-card:hover img {
-            transform: scale(1.2);
-        }
-
-        .feature-card:hover .extra-info {
-            display: block;
-            opacity: 1;
         }
 
         /* Footer Section */
         footer {
-            background-color: #333;
+            margin-top: auto;
+            padding: 20px;
+            background: #3B3DFE;
             color: white;
             text-align: center;
-            padding: 20px;
         }
 
         footer a {
-            color: #fbc531;
+            color: #FBC531;
             text-decoration: none;
         }
 
@@ -277,92 +245,75 @@
 
         /* Responsive Design */
         @media (max-width: 768px) {
-            .hero h1 {
-                font-size: 2.5rem;
+            .dashboard-header {
+                flex-direction: column;
+                align-items: center;
+                text-align: center;
             }
 
-            .hero p {
-                font-size: 1rem;
+            .dashboard-header h1 {
+                margin-bottom: 10px;
             }
 
-            .feature-card {
-                width: 100%;
+            .features-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .logo {
+                font-size: 1.5rem; /* Adjust logo size for smaller screens */
             }
         }
     </style>
 </head>
 <body>
-
-<!-- Header with Creative Logo -->
-<div class="header">
-    <div class="logo">TutorConnect</div>
-</div>
-
-<header class="hero">
-    <!-- Floating Shapes -->
-    <div class="shape"></div>
-    <div class="shape"></div>
-    <div class="shape"></div>
-    <div class="shape"></div>
-
-    <!-- Floating Icons -->
-    <div class="icon">
-        <img src="https://img.icons8.com/color/48/000000/open-book.png" alt="Book">
-    </div>
-    <div class="icon">
-        <img src="https://img.icons8.com/color/48/000000/calculator.png" alt="Calculator">
-    </div>
-    <div class="icon">
-        <img src="https://img.icons8.com/color/48/000000/laptop.png" alt="Computer">
-    </div>
-    <div class="icon">
-        <img src="https://img.icons8.com/color/48/000000/clipboard.png" alt="Clipboard">
+    <!-- Background Shapes -->
+    <div class="dashboard-background">
+        <div class="shape"></div>
+        <div class="shape"></div>
+        <div class="shape"></div>
+        <div class="shape"></div>
     </div>
 
-    <!-- Hero Content -->
-    <div class="content">
-        <h1>Discover the Future of Learning</h1>
-        <p>At TutorConnect, we connect students and tutors for a seamless learning experience. Your success begins here.</p>
-        <div class="buttons">
-            <a href="/login">Log In</a>
-            <a href="/register" class="btn-secondary">Get Started</a>
+    <!-- Dashboard Header -->
+    <header class="dashboard-header">
+        <a href="/" class="logo">TutorConnect</a>
+        <div class="actions">
+            <span class="bell-icon" data-count="3">&#128276;</span>
+            <a href="/profile" class="btn">Profile</a>
+            <a href="/logout" class="btn btn-secondary">Log Out</a>
+        </div>
+    </header>
+
+    <!-- Dashboard Content -->
+    <div class="dashboard-content">
+        <p class="welcome-message">Welcome, {{ username }}!</p>
+        <h2>Your Dashboard</h2>
+        <div class="features-grid">
+            <!-- My Bookings -->
+            <a href="/my_bookings" class="feature-card">
+                <h3>My Bookings</h3>
+                <p>View and manage your upcoming tutoring sessions easily.</p>
+            </a>
+            <!-- My Listings -->
+            <a href="/listings" class="feature-card">
+                <h3>My Listings</h3>
+                <p>Create and manage your tutoring listings to connect with students.</p>
+            </a>
+            <!-- Reviews -->
+            <a href="/reviews" class="feature-card">
+                <h3>Reviews</h3>
+                <p>Read and respond to reviews left by students and tutors.</p>
+            </a>
+            <!-- Live Chat -->
+            <a href="/chat" class="feature-card">
+                <h3>Live Chat</h3>
+                <p>Connect with tutors in real-time to get immediate help and advice.</p>
+            </a>
         </div>
     </div>
-</header>
 
-<section class="features">
-    <h2>Why Choose TutorConnect?</h2>
-    <div class="features-grid">
-        <div class="feature-card">
-            <img src="https://img.icons8.com/color/48/000000/classroom.png" alt="Learn">
-            <h3>Personalized Learning</h3>
-            <p>Get access to tutors tailored to your learning style and needs.</p>
-            <div class="extra-info">
-                <p>We match you with tutors based on your preferences, learning speed, and goals, ensuring the best outcomes.</p>
-            </div>
-        </div>
-        <div class="feature-card">
-            <img src="https://img.icons8.com/color/48/000000/training.png" alt="Teach">
-            <h3>Teach & Earn</h3>
-            <p>Become a coach and share your skills while earning income.</p>
-            <div class="extra-info">
-                <p>Start your journey as a tutor today. Set your rates, manage your time, and help others excel.</p>
-            </div>
-        </div>
-        <div class="feature-card">
-            <img src="https://img.icons8.com/color/48/000000/calendar.png" alt="Schedule">
-            <h3>Effortless Scheduling</h3>
-            <p>Book and manage your sessions with our simple scheduling tools.</p>
-            <div class="extra-info">
-                <p>Our scheduling system lets you book and manage appointments effortlessly, keeping you organized.</p>
-            </div>
-        </div>
-    </div>
-</section>
-
-<footer>
-    <p>&copy; 2024 TutorConnect. All rights reserved. <a href="/privacy">Privacy Policy</a></p>
-</footer>
-
+    <footer>
+        &copy; 2024 TutorConnect. All rights reserved. <a href="/privacy">Privacy Policy</a>
+    </footer>
 </body>
 </html>

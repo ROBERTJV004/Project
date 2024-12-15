@@ -4,20 +4,22 @@ from werkzeug.security import check_password_hash, generate_password_hash
 from app.models import Bookings, Users
 from .helpers import get_account_type, login_required
 from datetime import datetime
+from app import db
 
 # Create a Blueprint instead of a Flask app
 main = Blueprint('main', __name__)
 
 @main.route("/")
-@login_required
 def index():
-    username = session["username"]
-    account_type = get_account_type(username)
-    
-    if account_type == "coach":
-        return redirect("coach")
-    else:
-        return redirect("student")
+    if 'user_id' in session:
+        username = session["username"]
+        account_type = get_account_type(username)
+        
+        if account_type == "coach":
+            return redirect("coach")
+        else:
+            return redirect("student")
+    return render_template("index.html")
 
 @main.route("/coach", methods=["GET"])
 @login_required(account_type="coach")
@@ -36,7 +38,7 @@ def student():
 @main.route("/register", methods=["GET"])
 def register_page():
     if 'user_id' in session:
-        return redirect("dashboard")
+        return redirect("/")
     return render_template('register.html')
 
 @main.route('/login', methods=['GET', 'POST'])
@@ -81,7 +83,19 @@ def create_user():
         if not username or not email or not role or not password:
             return jsonify({"error": "Missing required fields"}), 400
 
-        Users.query.insert(username, email, role, password).commit()
+        # Create new user instance
+        new_user = Users(
+            username=username,
+            email=email,
+            role=role,
+            password=password
+        )
+
+        # Add to database and commit
+        db.session.add(new_user)
+        db.session.commit()
+
+        # Get the user that was just created
         user = Users.query.filter_by(username=username).first()
 
         session['user_id'] = user.id
@@ -90,7 +104,7 @@ def create_user():
         return redirect("/")
 
     except Exception as e:
-        return render_template('register.html', error=str(e))
+        return render_template('register.html', error="Failed to create account")
 
 @main.route("/logout")
 def logout():
