@@ -1,29 +1,572 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Add a Review</title>
+    <title>Reviews - TutorConnect</title>
+    <style>
+        /* General Reset */
+        body,
+        html {
+            margin: 0;
+            padding: 0;
+            font-family: 'Roboto', sans-serif;
+            background-color: #fefefe;
+            overflow-x: hidden;
+        }
+
+        /* Dashboard Background */
+        .dashboard-background {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(to bottom right, #6C63FF, #3B3DFE, #FFFFFF);
+            z-index: -1;
+            overflow: hidden;
+        }
+
+        /* Floating Shapes */
+        .shape {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            z-index: -1;
+            animation: float 8s ease-in-out infinite;
+        }
+
+        .shape:nth-child(1) {
+            top: 10%;
+            left: 15%;
+            width: 120px;
+            height: 120px;
+            animation-delay: 1s;
+        }
+
+        .shape:nth-child(2) {
+            bottom: 20%;
+            right: 10%;
+            width: 180px;
+            height: 180px;
+            animation-delay: 2s;
+        }
+
+        .shape:nth-child(3) {
+            top: 50%;
+            left: 60%;
+            width: 80px;
+            height: 80px;
+            animation-delay: 3s;
+        }
+
+        .shape:nth-child(4) {
+            bottom: 10%;
+            left: 25%;
+            width: 150px;
+            height: 150px;
+            animation-delay: 4s;
+        }
+
+        @keyframes float {
+            0% {
+                transform: translateY(0);
+            }
+
+            50% {
+                transform: translateY(-20px);
+            }
+
+            100% {
+                transform: translateY(0);
+            }
+        }
+
+        /* Dashboard Header */
+        .dashboard-header {
+            background: linear-gradient(to right, #6C63FF, #3B3DFE);
+            padding: 20px 50px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            color: white;
+            border-radius: 0 0 15px 15px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Logo */
+        .logo {
+            font-size: 1.8rem;
+            font-weight: 800;
+            color: #ffffff;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            background: linear-gradient(90deg, #FF4757, #FBC531);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-decoration: none;
+        }
+
+        /* Notification Bell */
+        .bell-icon {
+            font-size: 1.8rem;
+            color: white;
+            margin-right: 15px;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .bell-icon:hover {
+            color: #FF4757;
+        }
+
+        .bell-icon::after {
+            content: attr(data-count);
+            position: absolute;
+            top: -5px;
+            right: -10px;
+            background: #FF4757;
+            color: white;
+            font-size: 0.8rem;
+            font-weight: bold;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            text-align: center;
+            line-height: 20px;
+            display: none;
+        }
+
+        .bell-icon[data-count]:after {
+            display: inline-block;
+        }
+
+        .dashboard-header .actions {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .dashboard-header .btn {
+            padding: 10px 20px;
+            font-size: 1rem;
+            font-weight: bold;
+            color: white;
+            text-decoration: none;
+            border-radius: 20px;
+            background: #FF4757;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .dashboard-header .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .dashboard-header .btn-secondary {
+            background: #FBC531;
+        }
+
+        .dashboard-header .btn-secondary:hover {
+            background: #E1B12C;
+        }
+
+        /* Main Content */
+        .dashboard-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 50px 20px;
+            z-index: 1;
+        }
+
+        .dashboard-content h2 {
+            font-size: 2.5rem;
+            color: #3B3DFE;
+            margin-bottom: 40px;
+            text-align: center;
+        }
+
+        /* Reviews Table and Cards */
+        .reviews-table {
+            width: 100%;
+            max-width: 1200px;
+            margin-bottom: 30px;
+        }
+
+        .review-row {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .review-main {
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
+            padding: 20px;
+            align-items: center;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+        }
+
+        .review-details {
+            padding: 20px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .review-card {
+            background: rgba(255, 255, 255, 0.8);
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+
+        .review-card h6 {
+            color: #3B3DFE;
+            margin-bottom: 15px;
+            font-size: 1.1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .review-toggle {
+            background: none;
+            border: none;
+            color: #3B3DFE;
+            cursor: pointer;
+            font-size: 1.2rem;
+            padding: 5px;
+            transition: transform 0.3s ease;
+        }
+
+        .review-toggle:hover {
+            transform: scale(1.1);
+        }
+
+        .review-content {
+            display: none;
+        }
+
+        .review-content.show {
+            display: block;
+        }
+
+        .status-badge {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            display: inline-block;
+            background: linear-gradient(45deg, #00B09B, #96C93D);
+            color: white;
+        }
+
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            width: 90%;
+            max-width: 800px;
+            margin: 50px auto;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .star-rating {
+            color: #FBC531;
+            font-size: 1.2rem;
+        }
+
+        /* Footer */
+        footer {
+            margin-top: auto;
+            padding: 20px;
+            background: #3B3DFE;
+            color: white;
+            text-align: center;
+            width: 100%;
+        }
+
+        footer a {
+            color: #FBC531;
+            text-decoration: none;
+        }
+
+        footer a:hover {
+            text-decoration: underline;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .dashboard-header {
+                flex-direction: column;
+                align-items: center;
+                text-align: center;
+                padding: 20px;
+            }
+
+            .reviews-table {
+                display: block;
+                overflow-x: auto;
+                white-space: nowrap;
+            }
+
+            .modal-content {
+                width: 95%;
+                margin: 20px auto;
+            }
+        }
+
+        /* Star Rating Input */
+        .star-rating-input {
+            display: inline-flex;
+            flex-direction: row-reverse;
+            gap: 5px;
+        }
+
+        .star-rating-input input {
+            display: none;
+        }
+
+        .star-rating-input label {
+            cursor: pointer;
+            font-size: 1.5rem;
+            color: #ddd;
+            transition: color 0.2s ease;
+        }
+
+        .star-rating-input label:hover,
+        .star-rating-input label:hover~label,
+        .star-rating-input input:checked~label {
+            color: #FBC531;
+        }
+
+        .review-input-form {
+            margin-top: 15px;
+        }
+
+        .review-input-form textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e1e1e1;
+            border-radius: 8px;
+            margin: 10px 0;
+            font-size: 1rem;
+            resize: vertical;
+            min-height: 100px;
+            transition: border-color 0.3s ease;
+        }
+
+        .review-input-form textarea:focus {
+            outline: none;
+            border-color: #3B3DFE;
+        }
+
+        .review-input-form button {
+            background: linear-gradient(45deg, #3B3DFE, #6C63FF);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .review-input-form button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(59, 61, 254, 0.3);
+        }
+
+        .review-section {
+            margin-top: 20px;
+            padding: 20px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .review-section h6 {
+            color: #3B3DFE;
+            margin-bottom: 15px;
+            font-size: 1.1rem;
+        }
+    </style>
 </head>
+
 <body>
-    <h1>Add a Review</h1>
-    <form action="/reviews" method="POST">
-        <label for="booking_id">Booking ID:</label>
-        <input type="number" name="booking_id" id="booking_id" required><br><br>
+    <!-- Background Shapes -->
+    <div class="dashboard-background">
+        <div class="shape"></div>
+        <div class="shape"></div>
+        <div class="shape"></div>
+        <div class="shape"></div>
+    </div>
 
-        <label for="rating">Rating (1-5):</label>
-        <select name="rating" id="rating" required>
-            <option value="1">1 - Poor</option>
-            <option value="2">2 - Fair</option>
-            <option value="3">3 - Good</option>
-            <option value="4">4 - Very Good</option>
-            <option value="5">5 - Excellent</option>
-        </select><br><br>
+    <!-- Dashboard Header -->
+    <header class="dashboard-header">
+        <a href="/" class="logo">TutorConnect</a>
+        <div class="actions">
+            <span class="bell-icon" data-count="3">&#128276;</span>
+            <a href="/profile" class="btn">Profile</a>
+            <a href="/logout" class="btn btn-secondary">Log Out</a>
+        </div>
+    </header>
 
-        <label for="review">Review (optional):</label><br>
-        <textarea name="review" id="review" rows="4" cols="50"></textarea><br><br>
+    <!-- Dashboard Content -->
+    <div class="dashboard-content">
+        <h2>Past Bookings & Reviews</h2>
 
-        <button type="submit">Submit Review</button>
-    </form>
+        {% if not bookings %}
+        <div class="alert alert-info" role="alert"
+            style="background: white; padding: 20px; border-radius: 10px; text-align: center; color: #666;">
+            No past bookings found.
+        </div>
+        {% else %}
+        <div class="reviews-table">
+            {% for booking in bookings %}
+            <div class="review-row">
+                <div class="review-main">
+                    <div>{{ booking.booking_date.strftime('%Y-%m-%d') }}</div>
+                    <div>{{ booking.booking_time.strftime('%H:%M') }}</div>
+                    <div>{{ booking.subject }}</div>
+                    {% if account_type == "student" %}
+                    <div>{{ booking.coach_name }}</div>
+                    {% else %}
+                    <div>{{ booking.student_name }}</div>
+                    {% endif %}
+                    <div>${{ "%.2f"|format(booking.price) }}</div>
+                    <div>
+                        <span class="status-badge">{{ booking.status }}</span>
+                        <button class="review-toggle" onclick="toggleReviews({{ booking.id }})">↓</button>
+                    </div>
+                </div>
+                <div class="review-content" id="review{{ booking.id }}">
+                    <div class="review-details">
+                        <!-- Student Review -->
+                        <div class="review-card">
+                            <h6>Student Review</h6>
+                            {% if account_type == "student" and not booking.student_review %}
+                            <form class="review-input-form" onsubmit="submitReview(event, {{ booking.id }}, 'student')">
+                                <div class="star-rating-input">
+                                    {% for i in range(5, 0, -1) %}
+                                    <input type="radio" id="star{{ i }}_{{ booking.id }}" name="rating" value="{{ i }}"
+                                        required>
+                                    <label for="star{{ i }}_{{ booking.id }}">⭐</label>
+                                    {% endfor %}
+                                </div>
+                                <textarea name="review_text" placeholder="Write your review here..."
+                                    required></textarea>
+                                <button type="submit">Submit Review</button>
+                            </form>
+                            {% elif booking.student_review %}
+                            <p>{{ booking.student_review }}</p>
+                            <div class="star-rating">
+                                {% for i in range(booking.student_rating|int) %}⭐{% endfor %}
+                            </div>
+                            {% else %}
+                            <p class="text-muted">No review provided</p>
+                            {% endif %}
+                        </div>
+
+                        <!-- Coach Review -->
+                        <div class="review-card">
+                            <h6>Coach Review</h6>
+                            {% if account_type == "coach" and not booking.coach_review %}
+                            <form class="review-input-form" onsubmit="submitReview(event, {{ booking.id }}, 'coach')">
+                                <div class="star-rating-input">
+                                    {% for i in range(5, 0, -1) %}
+                                    <input type="radio" id="coach_star{{ i }}_{{ booking.id }}" name="rating"
+                                        value="{{ i }}" required>
+                                    <label for="coach_star{{ i }}_{{ booking.id }}">⭐</label>
+                                    {% endfor %}
+                                </div>
+                                <textarea name="review_text" placeholder="Write your review here..."
+                                    required></textarea>
+                                <button type="submit">Submit Review</button>
+                            </form>
+                            {% elif booking.coach_review %}
+                            <p>{{ booking.coach_review }}</p>
+                            <div class="star-rating">
+                                {% for i in range(booking.coach_rating|int) %}⭐{% endfor %}
+                            </div>
+                            {% else %}
+                            <p class="text-muted">No review provided</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+    </div>
+
+    <footer>
+        &copy; 2024 TutorConnect. All rights reserved. <a href="/privacy">Privacy Policy</a>
+    </footer>
+
+    <script>
+        function toggleReviews(bookingId) {
+            const content = document.getElementById(`review${bookingId}`);
+            const button = content.previousElementSibling.querySelector('.review-toggle');
+
+            if (content.classList.contains('show')) {
+                content.classList.remove('show');
+                button.textContent = '↓';
+            } else {
+                content.classList.add('show');
+                button.textContent = '↑';
+            }
+        }
+
+        function submitReview(event, bookingId, reviewerType) {
+            event.preventDefault();
+            const form = event.target;
+            const formData = new FormData(form);
+
+            fetch('/submit_review', {
+                method: 'POST',
+                body: new URLSearchParams({
+                    booking_id: bookingId,
+                    review_text: formData.get('review_text'),
+                    rating: formData.get('rating'),
+                    reviewer_type: reviewerType
+                })
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.error) {
+                        alert('Error: ' + data.error);
+                    } else {
+                        window.location.reload();
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('An error occurred while submitting the review');
+                });
+        }
+    </script>
 </body>
+
 </html>

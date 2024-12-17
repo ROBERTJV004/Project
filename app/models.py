@@ -41,6 +41,11 @@ class Bookings(db.Model):
     updated_at = db.Column(db.DateTime, nullable=False, server_default=db.func.now(), onupdate=db.func.now())
     persons_booked = db.Column(db.Integer, nullable=False, default=1)
 
+    coach_review = db.Column(db.Text, nullable=True)
+    student_review = db.Column(db.Text, nullable=True)
+    coach_rating = db.Column(db.Integer, nullable=True)
+    student_rating = db.Column(db.Integer, nullable=True)
+
     # Relationships
     student = db.relationship('Users', foreign_keys=[student_id], backref='student_bookings')
     coach = db.relationship('Users', foreign_keys=[coach_id], backref='coach_bookings')

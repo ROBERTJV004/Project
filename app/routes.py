@@ -161,7 +161,17 @@ def create_booking():
 def my_bookings():
     if request.method == "GET":
         user_id = session["user_id"]
-        bookings = Bookings.query.with_entities(Bookings.id, Bookings.booking_date, Bookings.status).filter_by(student_id=user_id).all()
+        # Only fetch bookings that haven't passed yet
+        bookings = Bookings.query.with_entities(
+            Bookings.id, 
+            Bookings.booking_date, 
+            Bookings.status
+        ).filter(
+            Bookings.student_id == user_id,
+            (Bookings.booking_date > datetime.now().date()) |
+            ((Bookings.booking_date == datetime.now().date()) & 
+             (Bookings.booking_time > datetime.now().time()))
+        ).order_by(Bookings.booking_date.asc(), Bookings.booking_time.asc()).all()
         return render_template("student/my_bookings.html", bookings=bookings)
     
     try:
@@ -237,6 +247,107 @@ def accept_request():
         db.session.commit()
 
         return redirect("/coach/requests")
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@main.route("/reviews", methods=["GET"])
+@login_required
+def reviews():
+    try:
+        user_id = session["user_id"]
+        account_type = get_account_type(session["username"])
+        
+        # Query past bookings based on account type
+        if account_type == "student":
+            bookings = Bookings.query.join(
+                Users, Users.id == Bookings.coach_id
+            ).with_entities(
+                Bookings.id,
+                Bookings.booking_date,
+                Bookings.booking_time,
+                Bookings.subject,
+                Bookings.price,
+                Bookings.persons_booked,
+                Bookings.description,
+                Bookings.status,
+                Bookings.student_review,
+                Bookings.student_rating,
+                Bookings.coach_review,
+                Bookings.coach_rating,
+                Users.username.label('coach_name')
+            ).filter(
+                Bookings.student_id == user_id,
+                # (Bookings.booking_date < datetime.now().date()) |
+                # ((Bookings.booking_date == datetime.now().date()) & 
+                #  (Bookings.booking_time < datetime.now().time()))
+            ).order_by(Bookings.booking_date.desc(), Bookings.booking_time.desc()).all()
+        else:  # coach
+            bookings = Bookings.query.join(
+                Users, Users.id == Bookings.student_id
+            ).with_entities(
+                Bookings.id,
+                Bookings.booking_date,
+                Bookings.booking_time,
+                Bookings.subject,
+                Bookings.price,
+                Bookings.persons_booked,
+                Bookings.description,
+                Bookings.status,
+                Bookings.student_review,
+                Bookings.student_rating,
+                Bookings.coach_review,
+                Bookings.coach_rating,
+                Users.username.label('student_name')
+            ).filter(
+                Bookings.coach_id == user_id,
+                # (Bookings.booking_date < datetime.now().date()) |
+                # ((Bookings.booking_date == datetime.now().date()) & 
+                #  (Bookings.booking_time < datetime.now().time()))
+            ).order_by(Bookings.booking_date.desc(), Bookings.booking_time.desc()).all()
+
+        return render_template(
+            "reviews.html", 
+            bookings=bookings, 
+            account_type=account_type
+        )
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@main.route("/submit_review", methods=["POST"])
+@login_required
+def submit_review():
+    try:
+        booking_id = request.form.get("booking_id")
+        review_text = request.form.get("review_text")
+        rating = request.form.get("rating")
+        reviewer_type = request.form.get("reviewer_type")  # 'student' or 'coach'
+
+        if not all([booking_id, review_text, rating, reviewer_type]):
+            return jsonify({"error": "Missing required fields"}), 400
+
+        booking = Bookings.query.get(booking_id)
+        if not booking:
+            return jsonify({"error": "Booking not found"}), 404
+
+        # Verify the user has permission to review this booking
+        user_id = session["user_id"]
+        if reviewer_type == "student" and booking.student_id != user_id:
+            return jsonify({"error": "Unauthorized"}), 403
+        elif reviewer_type == "coach" and booking.coach_id != user_id:
+            return jsonify({"error": "Unauthorized"}), 403
+
+        # Update the appropriate review fields
+        if reviewer_type == "student":
+            booking.student_review = review_text
+            booking.student_rating = rating
+        else:
+            booking.coach_review = review_text
+            booking.coach_rating = rating
+
+        db.session.commit()
+        return jsonify({"message": "Review submitted successfully"}), 200
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500
