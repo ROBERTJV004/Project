@@ -291,8 +291,12 @@
         }
 
         .star-rating {
-            color: #FBC531;
+            color: #ddd;
             font-size: 1.2rem;
+        }
+
+        .star-rating .filled {
+            color: #FBC531;
         }
 
         /* Footer */
@@ -485,7 +489,12 @@
                             {% elif booking.student_review %}
                             <p>{{ booking.student_review }}</p>
                             <div class="star-rating">
-                                {% for i in range(booking.student_rating|int) %}★{% endfor %}
+                                {% for i in range(5) %}
+                                {% if i < booking.student_rating|int %} <span class="filled">★</span>
+                                    {% else %}
+                                    <span>★</span>
+                                    {% endif %}
+                                    {% endfor %}
                             </div>
                             {% else %}
                             <p class="text-muted">No review provided</p>
@@ -511,7 +520,12 @@
                             {% elif booking.coach_review %}
                             <p>{{ booking.coach_review }}</p>
                             <div class="star-rating">
-                                {% for i in range(booking.coach_rating|int) %}★{% endfor %}
+                                {% for i in range(5) %}
+                                {% if i < booking.coach_rating|int %} <span class="filled">★</span>
+                                    {% else %}
+                                    <span>★</span>
+                                    {% endif %}
+                                    {% endfor %}
                             </div>
                             {% else %}
                             <p class="text-muted">No review provided</p>
