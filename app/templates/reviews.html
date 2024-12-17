@@ -353,6 +353,10 @@
             transition: color 0.2s ease;
         }
 
+        .star-rating-input label:before {
+            content: '★';
+        }
+
         .star-rating-input label:hover,
         .star-rating-input label:hover~label,
         .star-rating-input input:checked~label {
@@ -471,7 +475,7 @@
                                     {% for i in range(5, 0, -1) %}
                                     <input type="radio" id="star{{ i }}_{{ booking.id }}" name="rating" value="{{ i }}"
                                         required>
-                                    <label for="star{{ i }}_{{ booking.id }}">⭐</label>
+                                    <label for="star{{ i }}_{{ booking.id }}"></label>
                                     {% endfor %}
                                 </div>
                                 <textarea name="review_text" placeholder="Write your review here..."
@@ -481,7 +485,7 @@
                             {% elif booking.student_review %}
                             <p>{{ booking.student_review }}</p>
                             <div class="star-rating">
-                                {% for i in range(booking.student_rating|int) %}⭐{% endfor %}
+                                {% for i in range(booking.student_rating|int) %}★{% endfor %}
                             </div>
                             {% else %}
                             <p class="text-muted">No review provided</p>
@@ -497,7 +501,7 @@
                                     {% for i in range(5, 0, -1) %}
                                     <input type="radio" id="coach_star{{ i }}_{{ booking.id }}" name="rating"
                                         value="{{ i }}" required>
-                                    <label for="coach_star{{ i }}_{{ booking.id }}">⭐</label>
+                                    <label for="coach_star{{ i }}_{{ booking.id }}"></label>
                                     {% endfor %}
                                 </div>
                                 <textarea name="review_text" placeholder="Write your review here..."
@@ -507,7 +511,7 @@
                             {% elif booking.coach_review %}
                             <p>{{ booking.coach_review }}</p>
                             <div class="star-rating">
-                                {% for i in range(booking.coach_rating|int) %}⭐{% endfor %}
+                                {% for i in range(booking.coach_rating|int) %}★{% endfor %}
                             </div>
                             {% else %}
                             <p class="text-muted">No review provided</p>
